@@ -7,19 +7,19 @@ namespace Application;
 [ApiController]
 public class KanbanController : ControllerBase
 {
+    private readonly IKanbanService _kanbanService;
     private readonly ILogger<KanbanController> _logger;
 
-    public KanbanController(ILogger<KanbanController> logger)
+    public KanbanController(ILogger<KanbanController> logger, IKanbanService kanbanService)
     {
         _logger = logger;
+        _kanbanService = kanbanService;
     }
 
     [HttpGet]
-    public IActionResult GetBoard(string boardId)
+    public async Task<IActionResult> GetBoard(string boardId)
     {
-        // Example: Retrieve board from the database based on boardId
-        var board = RetrieveBoardFromDatabase(boardId);
-
+        var board = await _kanbanService.GetBoardAsync(boardId);
         if (board == null)
         {
             _logger.LogWarning($"Board with ID '{boardId}' not found.");
@@ -31,18 +31,11 @@ public class KanbanController : ControllerBase
         return Ok(board);
     }
 
-    // Dummy method to simulate retrieving a board from the database
-    private Board RetrieveBoardFromDatabase(string boardId)
+    [HttpPut]
+    public async Task<IActionResult> PutBoard(Board board)
     {
-        // Example: This could be replaced with actual database retrieval logic
-        // For demonstration, creating a dummy board with sample data
-        var columns = new List<Column>
-        {
-            new() { Title = "1", Tickets = new List<Ticket>() },
-            new() { Title = "2", Tickets = new List<Ticket>() },
-            new() { Title = "3", Tickets = new List<Ticket>() }
-        };
+        var result = await _kanbanService.PutBoardAsync(board);
 
-        return new Board { BoardId = boardId, Columns = columns };
+        return Ok("The board was created or updated" + result);
     }
 }
