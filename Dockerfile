@@ -8,11 +8,11 @@ EXPOSE 8081
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Application/Application.csproj", "Application/"]
+COPY ["src/Application/Application.csproj", "Application/"]
 RUN dotnet nuget locals all --clear
 RUN dotnet restore "Application/Application.csproj"
 COPY . .
-WORKDIR "/src/Application"
+WORKDIR "/src/src/Application"
 RUN dotnet build "Application.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
