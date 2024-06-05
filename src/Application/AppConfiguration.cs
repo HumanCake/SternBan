@@ -7,6 +7,11 @@ public static class AppConfiguration
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.AddLogging(logging =>
+        {
+            logging.AddConsole();
+            logging.AddDebug();
+        });
     }
 
     public static void ConfigureMiddleware(this IApplicationBuilder app)
