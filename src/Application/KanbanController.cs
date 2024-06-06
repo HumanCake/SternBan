@@ -34,8 +34,14 @@ public class KanbanController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> PutBoard(Board board)
     {
+        //TODO: implement format validation
+        if (string.IsNullOrEmpty(board.BoardId))
+        {
+            return BadRequest("invalid format");
+        }
         var result = await _kanbanService.PutBoardAsync(board);
+        _logger.LogInformation($"The Board with ID '{result.BoardId}' was created or updated");
 
-        return Ok("The board was created or updated" + result);
+        return Ok("The board was created or updated:\n" + result);
     }
 }
