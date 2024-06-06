@@ -30,6 +30,8 @@ public static class AppConfiguration
         services.AddScoped<IDatabase, MongoDb>();
 
         services.AddScoped<IKanbanService, KanbanService>();
+
+        services.AddScoped<IBoardValidator, BoardValidator>();
     }
 
     public static void ConfigureMiddleware(this IApplicationBuilder app)

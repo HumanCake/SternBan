@@ -12,13 +12,15 @@ public class KanbanControllerTests
     private KanbanController _kanbanController;
     private IKanbanService _kanbanService;
     private ILogger<KanbanController> _logger;
+    private IBoardValidator _boardValidator;
 
     [SetUp]
     public void SetUp()
     {
         _kanbanService = Substitute.For<IKanbanService>();
         _logger = Substitute.For<ILogger<KanbanController>>();
-        _kanbanController = new KanbanController(_logger, _kanbanService);
+        _boardValidator = new BoardValidator();
+        _kanbanController = new KanbanController(_logger, _kanbanService, _boardValidator);
     }
 
     [Test]

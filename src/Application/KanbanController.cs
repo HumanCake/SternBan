@@ -8,12 +8,14 @@ namespace Application;
 public class KanbanController : ControllerBase
 {
     private readonly IKanbanService _kanbanService;
+    private readonly IBoardValidator _boardValidator;
     private readonly ILogger<KanbanController> _logger;
 
-    public KanbanController(ILogger<KanbanController> logger, IKanbanService kanbanService)
+    public KanbanController(ILogger<KanbanController> logger, IKanbanService kanbanService, IBoardValidator boardValidator)
     {
-        _logger = logger;
         _kanbanService = kanbanService;
+        _boardValidator = boardValidator;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -34,10 +36,10 @@ public class KanbanController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> PutBoard(Board board)
     {
-        //TODO: implement format validation
-        if (string.IsNullOrEmpty(board.BoardId))
+        var validationResult = _boardValidator.Validate(board);
+        if (!validationResult.IsValid)
         {
-            return BadRequest("invalid format");
+            return BadRequest(validationResult.Errors);
         }
         var result = await _kanbanService.PutBoardAsync(board);
         _logger.LogInformation($"The Board with ID '{result.BoardId}' was created or updated");
