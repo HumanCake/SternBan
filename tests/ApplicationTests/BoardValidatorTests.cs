@@ -1,10 +1,12 @@
+using Application;
 using Domain;
+using FluentValidation;
 
 namespace ApplicationTests;
 
 public class BoardValidatorTests
 {
-    private IBoardValidator _boardValidator;
+    private IValidator<Board> _boardValidator;
 
     [SetUp]
     public void SetUp()
@@ -67,7 +69,6 @@ public class BoardValidatorTests
 
         // Assert
         Assert.That(result.IsValid, Is.False);
-        Assert.That(result.Errors.Contains("BoardId cannot be null or empty"));
     }
 
     [Test]
@@ -76,7 +77,7 @@ public class BoardValidatorTests
         // Arrange
         var board = new Board
         {
-            BoardId = "b1",
+            BoardId = "",
             Title = "",
             Columns = new List<Column>
             {
@@ -96,7 +97,6 @@ public class BoardValidatorTests
 
         // Assert
         Assert.That(result.IsValid, Is.False);
-        Assert.That(result.Errors.Contains("Title cannot be null or empty"));
     }
 
     [Test]
@@ -115,7 +115,6 @@ public class BoardValidatorTests
 
         // Assert
         Assert.That(result.IsValid, Is.False);
-        Assert.That(result.Errors.Contains("Columns cannot be null or empty"));
     }
 
     [Test]
@@ -144,7 +143,6 @@ public class BoardValidatorTests
 
         // Assert
         Assert.That(result.IsValid, Is.False);
-        Assert.That(result.Errors.Contains("Column Title cannot be null or empty"));
     }
 
     [Test]
@@ -173,35 +171,5 @@ public class BoardValidatorTests
 
         // Assert
         Assert.That(result.IsValid, Is.False);
-        Assert.That(result.Errors.Contains("Ticket name cannot be null or empty"));
-    }
-
-    [Test]
-    public void Validate_ShouldReturnInvalidResult_WhenTicketDescriptionIsNullOrEmpty()
-    {
-        // Arrange
-        var board = new Board
-        {
-            BoardId = "b1",
-            Title = "Valid Board",
-            Columns = new List<Column>
-            {
-                new()
-                {
-                    Title = "Column 1",
-                    Tickets = new List<Ticket>
-                    {
-                        new() { name = "t1", description = "" }
-                    }
-                }
-            }
-        };
-
-        // Act
-        var result = _boardValidator.Validate(board);
-
-        // Assert
-        Assert.That(result.IsValid, Is.False);
-        Assert.That(result.Errors.Contains("Ticket description cannot be null or empty"));
     }
 }

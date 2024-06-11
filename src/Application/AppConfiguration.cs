@@ -1,3 +1,5 @@
+using Domain;
+using FluentValidation;
 using Infrastructure;
 using MongoDB.Driver;
 
@@ -31,7 +33,7 @@ public static class AppConfiguration
 
         services.AddScoped<IKanbanService, KanbanService>();
 
-        services.AddScoped<IBoardValidator, BoardValidator>();
+        services.AddScoped<IValidator<Board>, BoardValidator>();
     }
 
     public static void ConfigureMiddleware(this IApplicationBuilder app)

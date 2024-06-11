@@ -1,5 +1,6 @@
 using Application;
 using Domain;
+using FluentValidation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -9,10 +10,10 @@ namespace ApplicationTests;
 
 public class KanbanControllerTests
 {
+    private IValidator<Board> _boardValidator;
     private KanbanController _kanbanController;
     private IKanbanService _kanbanService;
     private ILogger<KanbanController> _logger;
-    private IBoardValidator _boardValidator;
 
     [SetUp]
     public void SetUp()
@@ -29,9 +30,10 @@ public class KanbanControllerTests
         // Arrange
         var boardId = "123";
         var board = Board.DefaultBoard();
+        var expectedBoard = OperationResult<Board>.SuccessResult(board);
 
         _kanbanService.GetBoardAsync(boardId)
-            .Returns(board);
+            .Returns(expectedBoard);
 
         // Act
         var result = await _kanbanController.GetBoard(boardId);
@@ -40,7 +42,7 @@ public class KanbanControllerTests
         var okObjectResult = result as OkObjectResult;
         Assert.That(okObjectResult, Is.Not.Null);
         Assert.That(okObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(okObjectResult.Value, Is.EqualTo(board));
+        Assert.That(okObjectResult.Value, Is.EqualTo(expectedBoard.Data));
     }
 
     [Test]
@@ -49,9 +51,8 @@ public class KanbanControllerTests
         // Arrange
         var boardId = "123";
         var board = Board.DefaultBoard();
-
         _kanbanService.GetBoardAsync(boardId)
-            .Returns(board);
+            .Returns(OperationResult<Board>.SuccessResult(board));
 
         // Act
         await _kanbanController.GetBoard(boardId);
@@ -65,9 +66,10 @@ public class KanbanControllerTests
     {
         // Arrange
         var board = Board.DefaultBoard();
+        var expectedBoard = OperationResult<Board>.SuccessResult(board);
 
         _kanbanService.PutBoardAsync(board)
-            .Returns(board);
+            .Returns(expectedBoard);
 
         // Act
         var result = await _kanbanController.PutBoard(board);
@@ -76,7 +78,7 @@ public class KanbanControllerTests
         var okObjectResult = result as OkObjectResult;
         Assert.That(okObjectResult, Is.Not.Null);
         Assert.That(okObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(okObjectResult.Value, Is.EqualTo("The board was created or updated:\n" + board));
+        Assert.That(okObjectResult.Value, Is.EqualTo("The board was created or updated:\n" + expectedBoard.Data));
     }
 
     [Test]
@@ -84,9 +86,10 @@ public class KanbanControllerTests
     {
         // Arrange
         var board = new Board();
+        var expectedBoard = OperationResult<Board>.ErrorResult("Invalid");
 
         _kanbanService.PutBoardAsync(board)
-            .Returns(board);
+            .Returns(expectedBoard);
 
         // Act
         var result = await _kanbanController.PutBoard(board);
@@ -95,5 +98,6 @@ public class KanbanControllerTests
         var badRequestObjectResult = result as BadRequestObjectResult;
         Assert.That(badRequestObjectResult, Is.Not.Null);
         Assert.That(badRequestObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        Assert.That(badRequestObjectResult.Value, Is.Not.Null);
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Domain;
 
-public class Board
+public record Board
 {
     public string BoardId { get; init; }
 

@@ -1,68 +1,45 @@
 using Domain;
+using FluentValidation;
+using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-public interface IBoardValidator
-{
-    ValidationResult Validate(Board board);
-}
+namespace Application;
 
-public class BoardValidator : IBoardValidator
+public class BoardValidator : AbstractValidator<Board>
 {
-    public ValidationResult Validate(Board board)
+    public BoardValidator()
     {
-        var result = new ValidationResult { IsValid = true };
-
-        if (string.IsNullOrEmpty(board.BoardId))
-        {
-            result.IsValid = false;
-            result.Errors.Add("BoardId cannot be null or empty");
-        }
-
-        if (string.IsNullOrEmpty(board.Title))
-        {
-            result.IsValid = false;
-            result.Errors.Add("Title cannot be null or empty");
-        }
-
-        if (board.Columns == null || board.Columns.Count == 0)
-        {
-            result.IsValid = false;
-            result.Errors.Add("Columns cannot be null or empty");
-        }
-        else
-        {
-            foreach (var column in board.Columns)
-            {
-                if (string.IsNullOrEmpty(column.Title))
-                {
-                    result.IsValid = false;
-                    result.Errors.Add("Column Title cannot be null or empty");
-                }
-                else
-                {
-                    foreach (var ticket in column.Tickets)
-                    {
-                        if (string.IsNullOrEmpty(ticket.name))
-                        {
-                            result.IsValid = false;
-                            result.Errors.Add("Ticket name cannot be null or empty");
-                        }
-
-                        if (string.IsNullOrEmpty(ticket.description))
-                        {
-                            result.IsValid = false;
-                            result.Errors.Add("Ticket description cannot be null or empty");
-                        }
-                    }
-                }
-            }
-        }
-
-        return result;
+        RuleFor(x => x.BoardId).NotEmpty();
+        RuleFor(x => x.Columns).NotEmpty();
+        RuleFor(x => x.Title).NotEmpty();
+        RuleForEach(x => x.Columns).SetValidator(new ColumnValidator());
     }
 }
 
-public class ValidationResult
+public class ColumnValidator : AbstractValidator<Column>
 {
-    public bool IsValid { get; set; }
-    public List<string> Errors { get; set; } = new();
+    public ColumnValidator()
+    {
+        RuleFor(x => x.Title).NotEmpty();
+        RuleForEach(x => x.Tickets).SetValidator(new TicketValidator());
+    }
+}
+
+public class TicketValidator : AbstractValidator<Ticket>
+{
+    public TicketValidator()
+    {
+        RuleFor(x => x.name).NotEmpty();
+    }
+}
+
+public static class BoardValidatorExtension
+{
+    public static void AddToModelState(this ValidationResult result, ModelStateDictionary modelState)
+    {
+        foreach (var error in result.Errors)
+        {
+            modelState.AddModelError(error.PropertyName, error.ErrorMessage);
+        }
+    }
 }

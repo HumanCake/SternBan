@@ -1,4 +1,5 @@
 using Domain;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Application;
@@ -7,11 +8,12 @@ namespace Application;
 [ApiController]
 public class KanbanController : ControllerBase
 {
+    private readonly IValidator<Board> _boardValidator;
     private readonly IKanbanService _kanbanService;
-    private readonly IBoardValidator _boardValidator;
     private readonly ILogger<KanbanController> _logger;
 
-    public KanbanController(ILogger<KanbanController> logger, IKanbanService kanbanService, IBoardValidator boardValidator)
+    public KanbanController(ILogger<KanbanController> logger, IKanbanService kanbanService,
+        IValidator<Board> boardValidator)
     {
         _kanbanService = kanbanService;
         _boardValidator = boardValidator;
@@ -22,15 +24,11 @@ public class KanbanController : ControllerBase
     public async Task<IActionResult> GetBoard(string boardId)
     {
         var board = await _kanbanService.GetBoardAsync(boardId);
-        if (board == null)
-        {
-            _logger.LogWarning($"Board with ID '{boardId}' not found.");
-            return NotFound();
-        }
+        if (!board.Success) BadRequest(board.ErrorMessage);
 
         _logger.LogInformation($"Board with ID '{boardId}' retrieved successfully.");
 
-        return Ok(board);
+        return Ok(board.Data);
     }
 
     [HttpPut]
@@ -39,11 +37,13 @@ public class KanbanController : ControllerBase
         var validationResult = _boardValidator.Validate(board);
         if (!validationResult.IsValid)
         {
-            return BadRequest(validationResult.Errors);
+            validationResult.AddToModelState(ModelState);
+            return BadRequest(ModelState);
         }
-        var result = await _kanbanService.PutBoardAsync(board);
-        _logger.LogInformation($"The Board with ID '{result.BoardId}' was created or updated");
 
-        return Ok("The board was created or updated:\n" + result);
+        var result = await _kanbanService.PutBoardAsync(board);
+        _logger.LogInformation($"The Board with ID '{result.Data.BoardId}' was created or updated");
+
+        return Ok("The board was created or updated:\n" + result.Data);
     }
 }
