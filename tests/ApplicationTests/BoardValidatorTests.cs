@@ -29,7 +29,7 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { name = "t1", description = "Ticket 1 Description" }
+                        new() { Title = "t1", Description = "Ticket 1 Description" }
                     }
                 }
             }
@@ -58,7 +58,7 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { name = "t1", description = "Ticket 1 Description" }
+                        new() { Title = "t1", Description = "Ticket 1 Description" }
                     }
                 }
             }
@@ -86,7 +86,7 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { name = "t1", description = "Ticket 1 Description" }
+                        new() { Title = "t1", Description = "Ticket 1 Description" }
                     }
                 }
             }
@@ -132,7 +132,7 @@ public class BoardValidatorTests
                     Title = "",
                     Tickets = new List<Ticket>
                     {
-                        new() { name = "t1", description = "Ticket 1 Description" }
+                        new() { Title = "t1", Description = "Ticket 1 Description" }
                     }
                 }
             }
@@ -160,7 +160,7 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { name = "", description = "Ticket 1 Description" }
+                        new() { Title = "", Description = "Ticket 1 Description" }
                     }
                 }
             }

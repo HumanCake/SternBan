@@ -2,6 +2,6 @@ namespace Domain;
 
 public record Ticket
 {
-    public string description;
-    public string name;
+    public string Description;
+    public required string Title;
 }

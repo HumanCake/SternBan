@@ -29,7 +29,7 @@ public class TicketValidator : AbstractValidator<Ticket>
 {
     public TicketValidator()
     {
-        RuleFor(x => x.name).NotEmpty();
+        RuleFor(x => x.Title).NotEmpty();
     }
 }
 

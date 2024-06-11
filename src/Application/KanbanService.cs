@@ -89,7 +89,7 @@ public class KanbanService : IKanbanService
 
             var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
             if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
-            var ticket = column.Tickets.FirstOrDefault(t => t.name == ticketId);
+            var ticket = column.Tickets.FirstOrDefault(t => t.Title == ticketId);
             if (ticket == null) return OperationResult<Board>.ErrorResult("Ticket not found");
 
             column.Tickets.Remove(ticket);
