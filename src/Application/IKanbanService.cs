@@ -10,5 +10,4 @@ public interface IKanbanService
     Task<OperationResult<Board>> RemoveColumnAsync(string boardId, string columnId);
     Task<OperationResult<Board>> PutTicket(string boardId, string columnId, Ticket ticket);
     Task<OperationResult<Board>> RemoveTicket(string boardId, string columnId, string ticketId);
-
 }

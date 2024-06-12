@@ -8,11 +8,13 @@ public class OperationResult<T>
 
     public static OperationResult<T> SuccessResult(T data)
     {
-        return new OperationResult<T>() { Success = true, Data = data };
+        return new OperationResult<T>
+            { Success = true, Data = data };
     }
 
     public static OperationResult<T> ErrorResult(string errorMessage)
     {
-        return new OperationResult<T>() { Success = false, ErrorMessage = errorMessage };
+        return new OperationResult<T>
+            { Success = false, ErrorMessage = errorMessage };
     }
 }

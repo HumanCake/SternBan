@@ -80,21 +80,21 @@ public class KanbanService : IKanbanService
         return await PutBoardAsync(board);
     }
 
-        public async Task<OperationResult<Board>> RemoveTicket(string boardId, string columnId, string ticketId)
-        {
-            var boardResult = await GetBoardAsync(boardId);
-            if (boardResult.Success) return boardResult;
+    public async Task<OperationResult<Board>> RemoveTicket(string boardId, string columnId, string ticketId)
+    {
+        var boardResult = await GetBoardAsync(boardId);
+        if (boardResult.Success) return boardResult;
 
-            var board = boardResult.Data;
+        var board = boardResult.Data;
 
-            var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
-            if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
-            var ticket = column.Tickets.FirstOrDefault(t => t.Title == ticketId);
-            if (ticket == null) return OperationResult<Board>.ErrorResult("Ticket not found");
+        var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
+        if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
+        var ticket = column.Tickets.FirstOrDefault(t => t.Title == ticketId);
+        if (ticket == null) return OperationResult<Board>.ErrorResult("Ticket not found");
 
-            column.Tickets.Remove(ticket);
-            var validationResult = await _boardValidator.ValidateAsync(board);
-            if (!validationResult.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
-            return await PutBoardAsync(board);
-        }
+        column.Tickets.Remove(ticket);
+        var validationResult = await _boardValidator.ValidateAsync(board);
+        if (!validationResult.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
+        return await PutBoardAsync(board);
+    }
 }
