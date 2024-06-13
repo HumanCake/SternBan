@@ -25,6 +25,9 @@ public class KanbanService : IKanbanService
 
     public async Task<OperationResult<Board>> PutBoardAsync(Board board)
     {
+        var validationResult = _boardValidator.ValidateAsync(board);
+        if (!validationResult.Result.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
+
         board = await _database.PutBoardAsync(board);
         return OperationResult<Board>.SuccessResult(board);
     }
