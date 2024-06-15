@@ -48,7 +48,7 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage, Contains.Substring("not found"));
+        Assert.That(result.ErrorMessage.Contains("not found"));
     }
 
     [Test]
@@ -123,7 +123,7 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage, Contains.Substring("Board not found"));
+        Assert.That(result.ErrorMessage.Contains("Board not found"));
     }
 
     [Test]
@@ -142,6 +142,78 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage, Contains.Substring("must not be empty"));
+        Assert.That(result.ErrorMessage.Contains("must not be empty"));
+    }
+
+    [Test]
+    public async Task RemoveColumnAsync_ColumnExists_ShouldReturnSuccessResult()
+    {
+        //Arrange
+        var columnToRemove = _defaultBoard.Columns.FirstOrDefault();
+        var boardId = _defaultBoard.BoardId;
+        _database.GetBoardAsync(boardId)
+            .Returns(_defaultBoard);
+        _database.PutBoardAsync(Arg.Any<Board>())
+            .Returns(x => x.Arg<Board>());
+
+        //Act
+        var result = await _kanbanService.RemoveColumnAsync(boardId, columnToRemove.Title);
+
+        //Assert
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.Columns.Any(c => c.Title == columnToRemove.Title), Is.False);
+    }
+
+    [Test]
+    public async Task RemoveColumnAsync_RemovingLastColumn_ShouldReturnErrorResult()
+    {
+        //Arrange
+        var columnToRemove = _defaultBoard.Columns.FirstOrDefault();
+        var board = _defaultBoard with
+        {
+            Columns = new List<Column>
+            {
+                columnToRemove
+            }
+        };
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(board);
+
+        //Act
+        var result = await _kanbanService.RemoveColumnAsync(board.BoardId, columnToRemove.Title);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("must not be empty"));
+    }
+
+    [Test]
+    public async Task RemoveColumnAsync_ColumnNotFound_ShouldReturnErrorResult()
+    {
+        //Arrange
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(_defaultBoard);
+
+        //Act
+        var result = await _kanbanService.RemoveColumnAsync(_defaultBoard.BoardId, "unknown");
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("Column not found"));
+    }
+
+    [Test]
+    public async Task RemoveColumnAsync_BordNotFound_ShouldReturnErrorResult()
+    {
+        //Arrange
+        _database.GetBoardAsync(Arg.Any<string>())
+            .Returns(Task.FromResult<Board>(null));
+
+        //Act
+        var result = await _kanbanService.RemoveColumnAsync("unknown", "unknownh");
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("Board not found"));
     }
 }
