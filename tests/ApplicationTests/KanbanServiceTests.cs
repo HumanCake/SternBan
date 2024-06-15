@@ -10,8 +10,8 @@ public class KanbanServiceTests
 {
     private readonly IValidator<Board> _boardValidator = new BoardValidator();
     private IDatabase _database;
-    private KanbanService _kanbanService;
     private Board _defaultBoard;
+    private KanbanService _kanbanService;
 
     [SetUp]
     public void Setup()
@@ -79,5 +79,69 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
+    }
+
+    [Test]
+    public async Task PutColumnAsync_ValidColumnAndBoard_ReturnSuccessResult()
+    {
+        //Arrange
+        var defaultBoard = _defaultBoard;
+        var columnToPut = _defaultBoard.Columns.FirstOrDefault() with
+        {
+            Title = "new column"
+        };
+        var expectedBoard = defaultBoard;
+        expectedBoard.Columns.Add(columnToPut);
+
+        _database.GetBoardAsync(defaultBoard.BoardId)
+            .Returns(defaultBoard);
+
+        _database.PutBoardAsync(expectedBoard)
+            .Returns(expectedBoard);
+
+        //Act
+        var result = await _kanbanService.PutColumnAsync(defaultBoard.BoardId, columnToPut);
+
+        //Assert
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data, Is.EqualTo(_defaultBoard));
+    }
+
+    [Test]
+    public async Task PutColumnAsync_BoardDoesNotExist_ShouldReturnErrorResult()
+    {
+        //Arrange
+        var columnToPut = _defaultBoard.Columns.FirstOrDefault() with
+        {
+            Title = "new column"
+        };
+        _database.GetBoardAsync(Arg.Any<string>())
+            .Returns(Task.FromResult<Board>(null));
+
+        //Act
+        var result = await _kanbanService.PutColumnAsync(_defaultBoard.BoardId, columnToPut);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage, Contains.Substring("Board not found"));
+    }
+
+    [Test]
+    public async Task PutColumnAsync_InvalidColumn_ReturnErrorResult()
+    {
+        //Arrange
+        var invalidColumn = _defaultBoard.Columns.FirstOrDefault() with
+        {
+            Title = ""
+        };
+        _database.GetBoardAsync(Arg.Any<string>())
+            .Returns(_defaultBoard);
+
+        //Act
+        var result = await _kanbanService.PutColumnAsync(_defaultBoard.BoardId, invalidColumn);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage, Contains.Substring("must not be empty"));
     }
 }

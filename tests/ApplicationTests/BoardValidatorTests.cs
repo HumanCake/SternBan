@@ -29,7 +29,10 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { Title = "t1", Description = "Ticket 1 Description" }
+                        new()
+                        {
+                            Title = "t1", Description = "Ticket 1 Description"
+                        }
                     }
                 }
             }
@@ -58,7 +61,10 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { Title = "t1", Description = "Ticket 1 Description" }
+                        new()
+                        {
+                            Title = "t1", Description = "Ticket 1 Description"
+                        }
                     }
                 }
             }
@@ -86,7 +92,10 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { Title = "t1", Description = "Ticket 1 Description" }
+                        new()
+                        {
+                            Title = "t1", Description = "Ticket 1 Description"
+                        }
                     }
                 }
             }
@@ -105,9 +114,7 @@ public class BoardValidatorTests
         // Arrange
         var board = new Board
         {
-            BoardId = "b1",
-            Title = "Valid Board",
-            Columns = null
+            BoardId = "b1", Title = "Valid Board", Columns = null
         };
 
         // Act
@@ -132,7 +139,10 @@ public class BoardValidatorTests
                     Title = "",
                     Tickets = new List<Ticket>
                     {
-                        new() { Title = "t1", Description = "Ticket 1 Description" }
+                        new()
+                        {
+                            Title = "t1", Description = "Ticket 1 Description"
+                        }
                     }
                 }
             }
@@ -160,7 +170,10 @@ public class BoardValidatorTests
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
-                        new() { Title = "", Description = "Ticket 1 Description" }
+                        new()
+                        {
+                            Title = "", Description = "Ticket 1 Description"
+                        }
                     }
                 }
             }

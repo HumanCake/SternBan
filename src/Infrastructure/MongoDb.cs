@@ -29,7 +29,10 @@ public class MongoDb : IDatabase
     {
         var filter = Builders<Board>.Filter.Eq(b => b.BoardId, board.BoardId);
 
-        await _boardsCollection.ReplaceOneAsync(filter, board, new ReplaceOptions { IsUpsert = true });
+        await _boardsCollection.ReplaceOneAsync(filter, board, new ReplaceOptions
+        {
+            IsUpsert = true
+        });
 
         return board;
     }

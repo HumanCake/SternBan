@@ -5,10 +5,10 @@ using Testcontainers.MongoDb;
 
 public class MongoDbTests
 {
+    private readonly Board DefaultBoard = Board.DefaultBoard();
     private IMongoClient _mongoClient;
     private MongoDb _mongoDb;
     private MongoDbContainer _mongoDbContainer;
-    private readonly Board DefaultBoard = Board.DefaultBoard();
 
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
@@ -62,7 +62,10 @@ public class MongoDbTests
     public async Task PutBoardAsync_InsertsBoard_WhenBoardDoesNotExist()
     {
         // Arrange
-        var board = DefaultBoard with { BoardId = "new id" };
+        var board = DefaultBoard with
+        {
+            BoardId = "new id"
+        };
 
         // Act
         await _mongoDb.PutBoardAsync(board);
@@ -77,7 +80,10 @@ public class MongoDbTests
     public async Task PutBoardAsync_UpdatesBoard_WhenBoardExists()
     {
         // Arrange
-        var board = DefaultBoard with { Title = "Updated Board" };
+        var board = DefaultBoard with
+        {
+            Title = "Updated Board"
+        };
 
         // Act
         await _mongoDb.PutBoardAsync(board);

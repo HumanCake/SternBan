@@ -18,7 +18,7 @@ public static class AppConfiguration
             logging.AddDebug();
         });
 
-        services.AddSingleton<IMongoClient>(provider =>
+        services.AddSingleton<IMongoClient>(_ =>
         {
             var connectionString = "mongodb://localhost:27017";
             return new MongoClient(connectionString);
