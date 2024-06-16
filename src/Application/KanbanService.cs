@@ -62,10 +62,10 @@ public class KanbanService : IKanbanService
         return await PutBoardAsync(board);
     }
 
-    public async Task<OperationResult<Board>> PutTicket(string boardId, string columnId, Ticket ticket)
+    public async Task<OperationResult<Board>> PutTicketAsync(string boardId, string columnId, Ticket ticket)
     {
         var boardResult = await GetBoardAsync(boardId);
-        if (boardResult.Success) return boardResult;
+        if (!boardResult.Success) return boardResult;
 
         var board = boardResult.Data;
 
@@ -83,7 +83,7 @@ public class KanbanService : IKanbanService
         return await PutBoardAsync(board);
     }
 
-    public async Task<OperationResult<Board>> RemoveTicket(string boardId, string columnId, string ticketId)
+    public async Task<OperationResult<Board>> RemoveTicketAsync(string boardId, string columnId, string ticketId)
     {
         var boardResult = await GetBoardAsync(boardId);
         if (boardResult.Success) return boardResult;
