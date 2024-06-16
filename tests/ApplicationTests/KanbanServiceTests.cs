@@ -104,7 +104,7 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data, Is.EqualTo(_defaultBoard));
+        Assert.That(result.Data.Columns.Any(column => column.Title == columnToPut.Title), Is.True);
     }
 
     [Test]
