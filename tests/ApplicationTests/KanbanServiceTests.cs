@@ -240,4 +240,69 @@ public class KanbanServiceTests
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data.Columns.FirstOrDefault().Tickets.Any(ticket => ticket.Title == ticketName), Is.True);
     }
+
+    [Test]
+    public async Task PutTicketAsync_ColumnNotFound_ShouldReturnErrorResult()
+    {
+        //Arrange
+        var ticketName = "new ticket";
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        {
+            Title = ticketName
+        };
+
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(_defaultBoard);
+
+        //Act
+        var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
+            "unknown column", ticketToPut);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("Column not found"));
+    }
+
+    [Test]
+    public async Task PutTicketAsync_BoardNotFound_ShouldReturnErrorResult()
+    {
+        //Arrange
+        var ticketName = "new ticket";
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        {
+            Title = ticketName
+        };
+
+        _database.GetBoardAsync(Arg.Any<string>())
+            .Returns(Task.FromResult<Board>(null));
+
+        //Act
+        var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
+            _defaultBoard.Columns.FirstOrDefault().Title, ticketToPut);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("Board not found"));
+    }
+
+    [Test]
+    public async Task PutTicketAsync_InvalidTicket_ReturnsErrorResult()
+    {
+        //Arrange
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        {
+            Title = ""
+        };
+
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(_defaultBoard);
+
+        //Act
+        var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
+            _defaultBoard.Columns.FirstOrDefault().Title, ticketToPut);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("must not be empty"));
+    }
 }
