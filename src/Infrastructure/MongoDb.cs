@@ -14,7 +14,7 @@ public class MongoDb : IDatabase
         _boardsCollection = database.GetCollection<Board>("boards");
     }
 
-    public async Task<Board> GetBoardAsync(string boardId)
+    public async Task<Board?> GetBoardAsync(string boardId)
     {
         var filter = Builders<Board>.Filter.Eq(board => board.BoardId, boardId);
 

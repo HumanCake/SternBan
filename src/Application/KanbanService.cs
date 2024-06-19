@@ -86,7 +86,7 @@ public class KanbanService : IKanbanService
     public async Task<OperationResult<Board>> RemoveTicketAsync(string boardId, string columnId, string ticketId)
     {
         var boardResult = await GetBoardAsync(boardId);
-        if (boardResult.Success) return boardResult;
+        if (!boardResult.Success) return boardResult;
 
         var board = boardResult.Data;
 

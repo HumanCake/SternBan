@@ -20,6 +20,7 @@ public static class AppConfiguration
 
         services.AddSingleton<IMongoClient>(_ =>
         {
+            //TODO move to appsettings
             var connectionString = "mongodb://localhost:27017";
             return new MongoClient(connectionString);
         });

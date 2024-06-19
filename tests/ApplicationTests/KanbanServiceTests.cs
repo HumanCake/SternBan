@@ -305,4 +305,58 @@ public class KanbanServiceTests
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage.Contains("must not be empty"));
     }
+
+    [Test]
+    public async Task RemoveTicketAsync_TicketExists_ReturnSuccessResult()
+    {
+        //Arrange
+        var ticketToRemove = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault();
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(_defaultBoard);
+        _database.PutBoardAsync(Arg.Any<Board>())
+            .Returns(x => x.Arg<Board>());
+
+        //Act
+        var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
+            _defaultBoard.Columns.FirstOrDefault().Title, ticketToRemove.Title);
+
+        //Assert
+        Assert.That(result.Success, Is.True);
+        Assert.That(result.Data.Columns.FirstOrDefault().Tickets.Any(ticket => ticket.Title == ticketToRemove.Title),
+            Is.False);
+    }
+
+    [Test]
+    public async Task RemoveTicketAsync_TicketDoesNotExist_ReturnErrorResult()
+    {
+        //Arrange
+        var ticketToRemove = "unkown ticket";
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(_defaultBoard);
+
+        //Act
+        var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
+            _defaultBoard.Columns.FirstOrDefault().Title, ticketToRemove);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("Ticket not found"));
+    }
+
+    [Test]
+    public async Task RemoveTicketAsync_ColumnDoesNotExist_ReturnErrorResult()
+    {
+        //Arrange
+        var ticketToRemove = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault();
+        _database.GetBoardAsync(_defaultBoard.BoardId)
+            .Returns(_defaultBoard);
+
+        //Act
+        var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
+            "unknown column", ticketToRemove.Title);
+
+        //Assert
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage.Contains("Column not found"));
+    }
 }
