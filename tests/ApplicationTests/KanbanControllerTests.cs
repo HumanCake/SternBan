@@ -85,7 +85,10 @@ public class KanbanControllerTests
     public async Task PutBoard_InvalidBoard_ShouldReturnBadRequest()
     {
         // Arrange
-        var board = new Board();
+        var board = new Board
+        {
+            BoardId = null!, Title = null!, Columns = null!
+        };
         var expectedBoard = OperationResult<Board>.ErrorResult("Invalid");
 
         _kanbanService.PutBoardAsync(board)

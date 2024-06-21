@@ -26,7 +26,7 @@ public class KanbanServiceTests
     {
         //Arrange
         var boardId = _defaultBoard.BoardId;
-        _database.GetBoardAsync(boardId).Returns(Task.FromResult(_defaultBoard));
+        _database.GetBoardAsync(boardId)!.Returns(Task.FromResult(_defaultBoard));
 
         //Act
         var result = await _kanbanService.GetBoardAsync(boardId);
@@ -40,15 +40,15 @@ public class KanbanServiceTests
     public async Task GetBoardAsync_BoardDoesNotExist_ShouldReturnErrorResult()
     {
         //Arrange
-        _database.GetBoardAsync(Arg.Any<string>())
-            .Returns(Task.FromResult<Board>(null));
+        _database.GetBoardAsync(Arg.Any<string>())!
+            .Returns(Task.FromResult<Board>(null!));
 
         //Act
         var result = await _kanbanService.GetBoardAsync("");
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("not found"));
     }
 
     [Test]
@@ -86,7 +86,7 @@ public class KanbanServiceTests
     {
         //Arrange
         var defaultBoard = _defaultBoard;
-        var columnToPut = _defaultBoard.Columns.FirstOrDefault() with
+        var columnToPut = _defaultBoard.Columns.FirstOrDefault()! with
         {
             Title = "new column"
         };
@@ -104,33 +104,33 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data.Columns.Any(column => column.Title == columnToPut.Title), Is.True);
+        Assert.That(result.Data!.Columns.Exists(column => column.Title == columnToPut.Title), Is.True);
     }
 
     [Test]
     public async Task PutColumnAsync_BoardDoesNotExist_ShouldReturnErrorResult()
     {
         //Arrange
-        var columnToPut = _defaultBoard.Columns.FirstOrDefault() with
+        var columnToPut = _defaultBoard.Columns.FirstOrDefault()! with
         {
             Title = "new column"
         };
-        _database.GetBoardAsync(Arg.Any<string>())
-            .Returns(Task.FromResult<Board>(null));
+        _database.GetBoardAsync(Arg.Any<string>())!
+            .Returns(Task.FromResult<Board>(null!));
 
         //Act
         var result = await _kanbanService.PutColumnAsync(_defaultBoard.BoardId, columnToPut);
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Board not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Board not found"));
     }
 
     [Test]
     public async Task PutColumnAsync_InvalidColumn_ReturnErrorResult()
     {
         //Arrange
-        var invalidColumn = _defaultBoard.Columns.FirstOrDefault() with
+        var invalidColumn = _defaultBoard.Columns.FirstOrDefault()! with
         {
             Title = ""
         };
@@ -142,7 +142,7 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("must not be empty"));
+        Assert.That(result.ErrorMessage, Does.Contain("must not be empty"));
     }
 
     [Test]
@@ -157,11 +157,11 @@ public class KanbanServiceTests
             .Returns(x => x.Arg<Board>());
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync(boardId, columnToRemove.Title);
+        var result = await _kanbanService.RemoveColumnAsync(boardId, columnToRemove!.Title);
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data.Columns.Any(c => c.Title == columnToRemove.Title), Is.False);
+        Assert.That(result.Data!.Columns.Any(c => c.Title == columnToRemove.Title), Is.False);
     }
 
     [Test]
@@ -173,18 +173,18 @@ public class KanbanServiceTests
         {
             Columns = new List<Column>
             {
-                columnToRemove
+                columnToRemove!
             }
         };
         _database.GetBoardAsync(_defaultBoard.BoardId)
             .Returns(board);
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync(board.BoardId, columnToRemove.Title);
+        var result = await _kanbanService.RemoveColumnAsync(board.BoardId, columnToRemove!.Title);
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("must not be empty"));
+        Assert.That(result.ErrorMessage, Does.Contain("must not be empty"));
     }
 
     [Test]
@@ -199,22 +199,22 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Column not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Column not found"));
     }
 
     [Test]
     public async Task RemoveColumnAsync_BordNotFound_ShouldReturnErrorResult()
     {
         //Arrange
-        _database.GetBoardAsync(Arg.Any<string>())
-            .Returns(Task.FromResult<Board>(null));
+        _database.GetBoardAsync(Arg.Any<string>())!
+            .Returns(Task.FromResult<Board>(null!));
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync("unknown", "unknownh");
+        var result = await _kanbanService.RemoveColumnAsync("unknown", "unknown");
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Board not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Board not found"));
     }
 
     [Test]
@@ -222,7 +222,7 @@ public class KanbanServiceTests
     {
         //Arrange
         var ticketName = "new ticket";
-        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault()! with
         {
             Title = ticketName
         };
@@ -234,11 +234,11 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault().Title, ticketToPut);
+            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data.Columns.FirstOrDefault().Tickets.Any(ticket => ticket.Title == ticketName), Is.True);
+        Assert.That(result.Data!.Columns.FirstOrDefault()!.Tickets!.Any(ticket => ticket.Title == ticketName), Is.True);
     }
 
     [Test]
@@ -246,7 +246,7 @@ public class KanbanServiceTests
     {
         //Arrange
         var ticketName = "new ticket";
-        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault()! with
         {
             Title = ticketName
         };
@@ -260,7 +260,7 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Column not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Column not found"));
     }
 
     [Test]
@@ -268,28 +268,28 @@ public class KanbanServiceTests
     {
         //Arrange
         var ticketName = "new ticket";
-        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault()! with
         {
             Title = ticketName
         };
 
-        _database.GetBoardAsync(Arg.Any<string>())
-            .Returns(Task.FromResult<Board>(null));
+        _database.GetBoardAsync(Arg.Any<string>())!
+            .Returns(Task.FromResult<Board>(null!));
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault().Title, ticketToPut);
+            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Board not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Board not found"));
     }
 
     [Test]
     public async Task PutTicketAsync_InvalidTicket_ReturnsErrorResult()
     {
         //Arrange
-        var ticketToPut = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault() with
+        var ticketToPut = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault()! with
         {
             Title = ""
         };
@@ -299,18 +299,18 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault().Title, ticketToPut);
+            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("must not be empty"));
+        Assert.That(result.ErrorMessage, Does.Contain("must not be empty"));
     }
 
     [Test]
     public async Task RemoveTicketAsync_TicketExists_ReturnSuccessResult()
     {
         //Arrange
-        var ticketToRemove = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault();
+        var ticketToRemove = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault();
         _database.GetBoardAsync(_defaultBoard.BoardId)
             .Returns(_defaultBoard);
         _database.PutBoardAsync(Arg.Any<Board>())
@@ -318,11 +318,11 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault().Title, ticketToRemove.Title);
+            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToRemove!.Title);
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data.Columns.FirstOrDefault().Tickets.Any(ticket => ticket.Title == ticketToRemove.Title),
+        Assert.That(result.Data!.Columns.FirstOrDefault()!.Tickets!.Any(ticket => ticket.Title == ticketToRemove.Title),
             Is.False);
     }
 
@@ -330,33 +330,33 @@ public class KanbanServiceTests
     public async Task RemoveTicketAsync_TicketDoesNotExist_ReturnErrorResult()
     {
         //Arrange
-        var ticketToRemove = "unkown ticket";
+        var ticketToRemove = "unknown ticket";
         _database.GetBoardAsync(_defaultBoard.BoardId)
             .Returns(_defaultBoard);
 
         //Act
         var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault().Title, ticketToRemove);
+            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToRemove);
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Ticket not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Ticket not found"));
     }
 
     [Test]
     public async Task RemoveTicketAsync_ColumnDoesNotExist_ReturnErrorResult()
     {
         //Arrange
-        var ticketToRemove = _defaultBoard.Columns.FirstOrDefault().Tickets.FirstOrDefault();
+        var ticketToRemove = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault();
         _database.GetBoardAsync(_defaultBoard.BoardId)
             .Returns(_defaultBoard);
 
         //Act
         var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
-            "unknown column", ticketToRemove.Title);
+            "unknown column", ticketToRemove!.Title);
 
         //Assert
         Assert.That(result.Success, Is.False);
-        Assert.That(result.ErrorMessage.Contains("Column not found"));
+        Assert.That(result.ErrorMessage, Does.Contain("Column not found"));
     }
 }

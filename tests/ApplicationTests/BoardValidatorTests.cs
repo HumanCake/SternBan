@@ -114,7 +114,7 @@ public class BoardValidatorTests
         // Arrange
         var board = new Board
         {
-            BoardId = "b1", Title = "Valid Board", Columns = null
+            BoardId = "b1", Title = "Valid Board", Columns = null!
         };
 
         // Act

@@ -5,10 +5,10 @@ namespace Domain;
 public record Board
 {
     [BsonId]
-    public string BoardId { get; init; }
+    public required string BoardId { get; init; }
 
-    public string Title { get; set; }
-    public List<Column> Columns { get; set; }
+    public required string Title { get; set; }
+    public required List<Column> Columns { get; set; }
 
 
     public static Board DefaultBoard()

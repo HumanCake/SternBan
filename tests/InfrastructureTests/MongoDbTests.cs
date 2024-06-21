@@ -3,9 +3,11 @@ using Infrastructure;
 using MongoDB.Driver;
 using Testcontainers.MongoDb;
 
+namespace InfrastructureTests;
+
 public class MongoDbTests
 {
-    private readonly Board DefaultBoard = Board.DefaultBoard();
+    private readonly Board _defaultBoard = Board.DefaultBoard();
     private IMongoClient _mongoClient;
     private MongoDb _mongoDb;
     private MongoDbContainer _mongoDbContainer;
@@ -22,7 +24,7 @@ public class MongoDbTests
 
         var database = _mongoClient.GetDatabase("your_database_name");
         var collection = database.GetCollection<Board>("boards");
-        await collection.InsertOneAsync(DefaultBoard);
+        await collection.InsertOneAsync(_defaultBoard);
     }
 
     [OneTimeTearDown]
@@ -35,14 +37,14 @@ public class MongoDbTests
     public async Task GetBoardAsync_ReturnsBoard_WhenBoardExists()
     {
         // Arrange
-        var boardId = DefaultBoard.BoardId;
+        var boardId = _defaultBoard.BoardId;
 
         // Act
         var result = await _mongoDb.GetBoardAsync(boardId);
 
         // Assert
         Assert.NotNull(result);
-        Assert.AreEqual(boardId, result.BoardId);
+        Assert.That(result.BoardId, Is.EqualTo(boardId));
     }
 
     [Test]
@@ -62,7 +64,7 @@ public class MongoDbTests
     public async Task PutBoardAsync_InsertsBoard_WhenBoardDoesNotExist()
     {
         // Arrange
-        var board = DefaultBoard with
+        var board = _defaultBoard with
         {
             BoardId = "new id"
         };
@@ -73,14 +75,14 @@ public class MongoDbTests
         // Assert
         var actualBoard = await _mongoDb.GetBoardAsync(board.BoardId);
         Assert.NotNull(actualBoard);
-        Assert.AreEqual(board.BoardId, actualBoard.BoardId);
+        Assert.That(actualBoard.BoardId, Is.EqualTo(board.BoardId));
     }
 
     [Test]
     public async Task PutBoardAsync_UpdatesBoard_WhenBoardExists()
     {
         // Arrange
-        var board = DefaultBoard with
+        var board = _defaultBoard with
         {
             Title = "Updated Board"
         };
@@ -91,7 +93,7 @@ public class MongoDbTests
         // Assert
         var actualBoard = await _mongoDb.GetBoardAsync(board.BoardId);
         Assert.NotNull(actualBoard);
-        Assert.AreEqual(board.BoardId, actualBoard.BoardId);
-        Assert.AreEqual(board.Title, actualBoard.Title);
+        Assert.That(actualBoard.BoardId, Is.EqualTo(board.BoardId));
+        Assert.That(actualBoard.Title, Is.EqualTo(board.Title));
     }
 }

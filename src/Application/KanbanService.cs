@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Domain;
 using FluentValidation;
 using Infrastructure;
@@ -26,7 +27,10 @@ public class KanbanService : IKanbanService
     public async Task<OperationResult<Board>> PutBoardAsync(Board board)
     {
         var validationResult = _boardValidator.ValidateAsync(board);
-        if (!validationResult.Result.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
+        if (!validationResult.Result.IsValid)
+        {
+            return OperationResult<Board>.ErrorResult(validationResult.ToString() ?? string.Empty);
+        }
 
         board = await _database.PutBoardAsync(board);
         return OperationResult<Board>.SuccessResult(board);
@@ -38,6 +42,7 @@ public class KanbanService : IKanbanService
         if (!boardResult.Success) return boardResult;
 
         var board = boardResult.Data;
+        Debug.Assert(board != null, nameof(board) + " != null");
         board.Columns.Add(column);
 
         var validationResult = await _boardValidator.ValidateAsync(board);
@@ -52,6 +57,7 @@ public class KanbanService : IKanbanService
         if (!boardResult.Success) return boardResult;
 
         var board = boardResult.Data;
+        Debug.Assert(board != null, nameof(board) + " != null");
         var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
         if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
 
@@ -69,10 +75,11 @@ public class KanbanService : IKanbanService
 
         var board = boardResult.Data;
 
+        Debug.Assert(board != null, nameof(board) + " != null");
         var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
         if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
 
-        column.Tickets.Add(ticket);
+        column.Tickets?.Add(ticket);
         var validationResult = await _boardValidator.ValidateAsync(board);
 
         if (!validationResult.IsValid)
@@ -90,12 +97,13 @@ public class KanbanService : IKanbanService
 
         var board = boardResult.Data;
 
+        Debug.Assert(board != null, nameof(board) + " != null");
         var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
         if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
-        var ticket = column.Tickets.FirstOrDefault(t => t.Title == ticketId);
+        var ticket = column.Tickets?.FirstOrDefault(t => t.Title == ticketId);
         if (ticket == null) return OperationResult<Board>.ErrorResult("Ticket not found");
 
-        column.Tickets.Remove(ticket);
+        column.Tickets?.Remove(ticket);
         var validationResult = await _boardValidator.ValidateAsync(board);
         if (!validationResult.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
         return await PutBoardAsync(board);

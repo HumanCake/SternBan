@@ -34,7 +34,7 @@ public class KanbanController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> PutBoard(Board board)
     {
-        var validationResult = _boardValidator.Validate(board);
+        var validationResult = await _boardValidator.ValidateAsync(board);
         if (!validationResult.IsValid)
         {
             validationResult.AddToModelState(ModelState);
@@ -42,8 +42,13 @@ public class KanbanController : ControllerBase
         }
 
         var result = await _kanbanService.PutBoardAsync(board);
-        _logger.LogInformation($"The Board with ID '{result.Data.BoardId}' was created or updated");
+        if (result.Data != null)
+        {
+            _logger.LogInformation($"The Board with ID '{result.Data.BoardId}' was created or updated");
+            return Ok("The board was created or updated:\n" + result.Data);
+        }
 
-        return Ok("The board was created or updated:\n" + result.Data);
+        return StatusCode(500);
+
     }
 }

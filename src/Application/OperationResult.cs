@@ -2,9 +2,9 @@ namespace Application;
 
 public class OperationResult<T>
 {
-    public bool Success { get; set; }
-    public string ErrorMessage { get; set; }
-    public T Data { get; set; }
+    public bool Success { get; private init; }
+    public string? ErrorMessage { get; private init; }
+    public T? Data { get; private init; }
 
     public static OperationResult<T> SuccessResult(T data)
     {
