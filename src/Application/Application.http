@@ -1,6 +1,48 @@
 @Application_HostAddress = http://localhost:5259
 
-GET {{Application_HostAddress}}/weatherforecast/
+### Get Board by ID
+GET {{Application_HostAddress}}/api/kanban?boardId=b1
 Accept: application/json
 
-###
+### Update/Create a Board using Default Board Data
+PUT {{Application_HostAddress}}/api/kanban
+Content-Type: application/json
+Accept: application/json
+
+{
+  "boardId": "b1",
+  "title": "Project Board",
+  "columns": [
+    {
+      "title": "To Do",
+      "tickets": [
+        {
+          "title": "t1",
+          "description": "Ticket 1 Description"
+        },
+        {
+          "title": "t2",
+          "description": "Ticket 2 Description"
+        }
+      ]
+    },
+    {
+      "title": "Doing",
+      "tickets": [
+        {
+          "title": "t3",
+          "description": "Ticket 3 Description"
+        }
+      ]
+    },
+    {
+      "title": "Done",
+      "tickets": [
+        {
+          "title": "t4",
+          "description": "Ticket 4 Description"
+        }
+      ]
+    }
+  ]
+}
