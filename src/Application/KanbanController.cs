@@ -20,11 +20,15 @@ public class KanbanController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
+    [HttpGet("{boardId}")]
     public async Task<IActionResult> GetBoard(string boardId)
     {
         var board = await _kanbanService.GetBoardAsync(boardId);
-        if (!board.Success) BadRequest(board.ErrorMessage);
+        if (!board.Success)
+        {
+            _logger.LogWarning($"Failed to retrieve board with ID '{boardId}': {board.ErrorMessage}");
+            BadRequest(board.ErrorMessage);
+        }
 
         _logger.LogInformation($"Board with ID '{boardId}' retrieved successfully.");
 
@@ -32,7 +36,7 @@ public class KanbanController : ControllerBase
     }
 
     [HttpPut]
-    public async Task<IActionResult> PutBoard(Board board)
+    public async Task<IActionResult> PutBoard([FromBody] Board board)
     {
         var validationResult = await _boardValidator.ValidateAsync(board);
         if (!validationResult.IsValid)
@@ -42,13 +46,90 @@ public class KanbanController : ControllerBase
         }
 
         var result = await _kanbanService.PutBoardAsync(board);
+
         if (result.Data != null)
         {
             _logger.LogInformation($"The Board with ID '{result.Data.BoardId}' was created or updated");
+
             return Ok("The board was created or updated:\n" + result.Data);
         }
 
-        return StatusCode(500);
+        _logger.LogError($"Failed to create or update the board: {board.BoardId}");
+        return StatusCode(500, new
+        {
+            message = "An error occurred while processing your request."
+        });
+    }
 
+    [HttpPost("{boardId}/columns")]
+    public async Task<IActionResult> PutColumn(string boardId, [FromBody] Column column)
+    {
+        var result = await _kanbanService.PutColumnAsync(boardId, column);
+        if (!result.Success)
+        {
+            _logger.LogWarning($"Failed to add column to board with ID '{boardId}': {result.ErrorMessage}");
+            return BadRequest(result.ErrorMessage);
+        }
+
+        _logger.LogInformation($"Column added to board with ID '{boardId}'");
+        return Ok(new
+        {
+            message = "Column added", board = result.Data
+        });
+    }
+
+    [HttpDelete("{boardId}/columns/{columnId}")]
+    public async Task<IActionResult> RemoveColumn(string boardId, string columnId)
+    {
+        var result = await _kanbanService.RemoveColumnAsync(boardId, columnId);
+        if (!result.Success)
+        {
+            _logger.LogWarning(
+                $"Failed to remove column with ID '{columnId}' from board with ID '{boardId}': {result.ErrorMessage}");
+            return BadRequest(result.ErrorMessage);
+        }
+
+        _logger.LogInformation($"Column with ID '{columnId}' removed from board with ID '{boardId}'");
+        return Ok(new
+        {
+            message = "Column removed", board = result.Data
+        });
+    }
+
+    [HttpPost("{boardId}/columns/{columnId}/tickets")]
+    public async Task<IActionResult> PutTicket(string boardId, string columnId, [FromBody] Ticket ticket)
+    {
+        var result = await _kanbanService.PutTicketAsync(boardId, columnId, ticket);
+        if (!result.Success)
+        {
+            _logger.LogWarning(
+                $"Failed to add ticket to column with ID '{columnId}' on board with ID '{boardId}': {result.ErrorMessage}");
+            return BadRequest(result.ErrorMessage);
+        }
+
+        _logger.LogInformation($"Ticket added to column with ID '{columnId}' on board with ID '{boardId}'");
+        return Ok(new
+        {
+            message = "Ticket added", board = result.Data
+        });
+    }
+
+    [HttpDelete("{boardId}/columns/{columnId}/tickets/{ticketId}")]
+    public async Task<IActionResult> RemoveTicket(string boardId, string columnId, string ticketId)
+    {
+        var result = await _kanbanService.RemoveTicketAsync(boardId, columnId, ticketId);
+        if (!result.Success)
+        {
+            _logger.LogWarning(
+                $"Failed to remove ticket with ID '{ticketId}' from column with ID '{columnId}' on board with ID '{boardId}': {result.ErrorMessage}");
+            return BadRequest(result.ErrorMessage);
+        }
+
+        _logger.LogInformation(
+            $"Ticket with ID '{ticketId}' removed from column with ID '{columnId}' on board with ID '{boardId}'");
+        return Ok(new
+        {
+            message = "Ticket removed", board = result.Data
+        });
     }
 }
