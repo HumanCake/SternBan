@@ -61,7 +61,7 @@ public class KanbanController : ControllerBase
         });
     }
 
-    [HttpPost("{boardId}/columns")]
+    [HttpPut("{boardId}/columns")]
     public async Task<IActionResult> PutColumn(string boardId, [FromBody] Column column)
     {
         var result = await _kanbanService.PutColumnAsync(boardId, column);
@@ -96,7 +96,7 @@ public class KanbanController : ControllerBase
         });
     }
 
-    [HttpPost("{boardId}/columns/{columnId}/tickets")]
+    [HttpPut("{boardId}/columns/{columnId}/tickets")]
     public async Task<IActionResult> PutTicket(string boardId, string columnId, [FromBody] Ticket ticket)
     {
         var result = await _kanbanService.PutTicketAsync(boardId, columnId, ticket);
