@@ -27,7 +27,7 @@ public class KanbanController : ControllerBase
         if (!board.Success)
         {
             _logger.LogWarning($"Failed to retrieve board with ID '{boardId}': {board.ErrorMessage}");
-            BadRequest(board.ErrorMessage);
+            return BadRequest(board.ErrorMessage);
         }
 
         _logger.LogInformation($"Board with ID '{boardId}' retrieved successfully.");

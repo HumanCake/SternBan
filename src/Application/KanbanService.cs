@@ -42,10 +42,9 @@ public class KanbanService : IKanbanService
         if (!boardResult.Success) return boardResult;
 
         var board = boardResult.Data;
-        Debug.Assert(board != null, nameof(board) + " != null");
-        board.Columns.Add(column);
+        board?.Columns.Add(column);
 
-        var validationResult = await _boardValidator.ValidateAsync(board);
+        var validationResult = await _boardValidator.ValidateAsync(board ?? throw new InvalidOperationException());
         if (!validationResult.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
 
         return await PutBoardAsync(board);
