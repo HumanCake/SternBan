@@ -34,7 +34,7 @@ public class MongoDbTests
     }
 
     [Test]
-    public async Task GetBoardAsync_ReturnsBoard_WhenBoardExists()
+    public async Task GetBoardAsync_BoardExists_ReturnsBoard()
     {
         // Arrange
         var boardId = _defaultBoard.BoardId;
@@ -48,7 +48,7 @@ public class MongoDbTests
     }
 
     [Test]
-    public async Task GetBoardAsync_ReturnsNull_WhenBoardDoesNotExist()
+    public async Task GetBoardAsync_BoardDoesNotExist_ReturnsNull()
     {
         // Arrange
         var boardId = "non_existent_board_id";
@@ -61,7 +61,7 @@ public class MongoDbTests
     }
 
     [Test]
-    public async Task PutBoardAsync_InsertsBoard_WhenBoardDoesNotExist()
+    public async Task PutBoardAsync_BoardDoesNotExist_InsertsBoard()
     {
         // Arrange
         var board = _defaultBoard with
@@ -79,7 +79,7 @@ public class MongoDbTests
     }
 
     [Test]
-    public async Task PutBoardAsync_UpdatesBoard_WhenBoardExists()
+    public async Task PutBoardAsync_BoardExists_UpdatesBoard()
     {
         // Arrange
         var board = _defaultBoard with

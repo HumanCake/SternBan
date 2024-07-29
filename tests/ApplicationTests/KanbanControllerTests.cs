@@ -152,13 +152,60 @@ public class KanbanControllerTests
         var result = await _kanbanController.PutColumn(existingBoard.BoardId, columnToPut);
 
         //Assert
-        var resultAsOkResultObejct = result as OkObjectResult;
-        Assert.That(resultAsOkResultObejct, Is.Not.Null);
-        Assert.That(resultAsOkResultObejct.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(resultAsOkResultObejct.Value.ToString(), Is.EqualTo(new
+        var resultAsOkResultObject = result as OkObjectResult;
+        Assert.That(resultAsOkResultObject, Is.Not.Null);
+        Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        Assert.That(resultAsOkResultObject.Value.ToString(), Is.EqualTo(new
         {
             message = "Column added", board = expectedBoard
         }.ToString()));
         _logger.Received(1).LogInformation($"Column added to board with ID '{existingBoard.BoardId}'");
+    }
+
+    [Test]
+    public async Task RemoveColumn_KanbanServiceIsUnsuccessfull_ReturnsBadRequest()
+    {
+        //Arrange
+        var boardId = "boardId";
+        var columnId = "columnId";
+        var errorMessage = "Something went wrong";
+        var errorResult = OperationResult<Board>.ErrorResult(errorMessage);
+        _kanbanService.RemoveColumnAsync(boardId, columnId)
+            .Returns(errorResult);
+
+        //Act
+        var result = await _kanbanController.RemoveColumn(boardId, columnId);
+
+        //Assert
+        _logger.Received(1)
+            .LogWarning(
+                $"Failed to remove column with ID '{columnId}' from board with ID '{boardId}': {errorResult.ErrorMessage}");
+        var resultAsOkResultObject = result as BadRequestObjectResult;
+        Assert.That(resultAsOkResultObject, Is.Not.Null);
+        Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+    }
+
+    [Test]
+    public async Task RemoveColumn_Success_ReturnsOkResult()
+    {
+        //Arrange
+        var boardId = Board.DefaultBoard().BoardId;
+        var columnId = Board.DefaultBoard().Columns.FirstOrDefault()!.Title;
+        var successResult = OperationResult<Board>.SuccessResult(Board.DefaultBoard());
+        _kanbanService.RemoveColumnAsync(boardId, columnId)
+            .Returns(successResult);
+
+        //Act
+        var result = await _kanbanController.RemoveColumn(boardId, columnId);
+
+        //Assert
+        _logger.Received(1).LogInformation($"Column with ID '{columnId}' removed from board with ID '{boardId}'");
+        var resultAsOkResultObject = result as OkObjectResult;
+        Assert.That(resultAsOkResultObject, Is.Not.Null);
+        Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        Assert.That(resultAsOkResultObject.Value.ToString(), Is.EqualTo(new
+        {
+            message = "Column removed", board = Board.DefaultBoard()
+        }.ToString()));
     }
 }
