@@ -111,11 +111,11 @@ public class KanbanControllerTests
         var existingBoard = Board.DefaultBoard();
         var columnToPut = new Column
         {
-            Title = null
+            Title = null!
         };
         var boardToValidate = Board.DefaultBoard();
         boardToValidate.Columns.Add(columnToPut);
-        var validationResult = _boardValidator.Validate(boardToValidate);
+        var validationResult = await _boardValidator.ValidateAsync(boardToValidate);
         var kanbanServicePutColumnAsyncResult = OperationResult<Board>.ErrorResult(validationResult.ToString());
 
         _kanbanService.PutColumnAsync(existingBoard.BoardId, columnToPut)
@@ -139,7 +139,7 @@ public class KanbanControllerTests
     {
         //Arrange
         var existingBoard = Board.DefaultBoard();
-        var columnToPut = existingBoard.Columns.FirstOrDefault() with
+        var columnToPut = existingBoard.Columns.FirstOrDefault()! with
         {
             Title = "new"
         };
@@ -155,7 +155,7 @@ public class KanbanControllerTests
         var resultAsOkResultObject = result as OkObjectResult;
         Assert.That(resultAsOkResultObject, Is.Not.Null);
         Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(resultAsOkResultObject.Value.ToString(), Is.EqualTo(new
+        Assert.That(resultAsOkResultObject.Value!.ToString(), Is.EqualTo(new
         {
             message = "Column added", board = expectedBoard
         }.ToString()));
@@ -203,9 +203,64 @@ public class KanbanControllerTests
         var resultAsOkResultObject = result as OkObjectResult;
         Assert.That(resultAsOkResultObject, Is.Not.Null);
         Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
-        Assert.That(resultAsOkResultObject.Value.ToString(), Is.EqualTo(new
+        Assert.That(resultAsOkResultObject.Value!.ToString(), Is.EqualTo(new
         {
             message = "Column removed", board = Board.DefaultBoard()
+        }.ToString()));
+    }
+
+    [Test]
+    public async Task PutTicket_KanbanServiceIsUnSucessfull_ReturnBadRequest()
+    {
+        //Arrange
+        var boardId = "boardId";
+        var columnId = "columnId";
+        var ticket = new Ticket
+        {
+            Title = "title"
+        };
+        var errorMessage = "Something went wrong";
+        var errorResult = OperationResult<Board>.ErrorResult(errorMessage);
+        _kanbanService.PutTicketAsync(boardId, columnId, ticket)
+            .Returns(errorResult);
+
+        //Act
+        var result = await _kanbanController.PutTicket(boardId, columnId, ticket);
+
+        //Assert
+        _logger.Received(1)
+            .LogWarning(
+                $"Failed to add ticket to column with ID '{columnId}' on board with ID '{boardId}': {errorMessage}");
+        var resultAsOkResultObject = result as BadRequestObjectResult;
+        Assert.That(resultAsOkResultObject, Is.Not.Null);
+        Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+    }
+
+    [Test]
+    public async Task PutTicket_Success_ReturnOkResult()
+    {
+        //Arrange
+        var boardId = Board.DefaultBoard().BoardId;
+        var columnId = Board.DefaultBoard().Columns.FirstOrDefault()!.Title;
+        var ticket = new Ticket
+        {
+            Title = "some title"
+        };
+        var successResult = OperationResult<Board>.SuccessResult(Board.DefaultBoard());
+        _kanbanService.PutTicketAsync(boardId, columnId, ticket)
+            .Returns(successResult);
+
+        //Act
+        var result = await _kanbanController.PutTicket(boardId, columnId, ticket);
+
+        //Assert
+        _logger.Received(1).LogInformation($"Ticket added to column with ID '{columnId}' on board with ID '{boardId}'");
+        var resultAsOkResultObject = result as OkObjectResult;
+        Assert.That(resultAsOkResultObject, Is.Not.Null);
+        Assert.That(resultAsOkResultObject.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        Assert.That(resultAsOkResultObject.Value!.ToString(), Is.EqualTo(new
+        {
+            message = "Ticket added", board = Board.DefaultBoard()
         }.ToString()));
     }
 }
