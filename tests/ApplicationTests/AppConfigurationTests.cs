@@ -11,10 +11,12 @@ public class AppConfigurationTests
     public void ConfigureServices_Should_NotThrowException()
     {
         // Arrange
+        var builder = WebApplication.CreateBuilder();
+
         var services = new ServiceCollection();
 
         // Act & Assert
-        Assert.DoesNotThrow(() => services.ConfigureServices());
+        Assert.DoesNotThrow(() => services.ConfigureServices(builder.Configuration));
     }
 
     [Test]
@@ -23,7 +25,7 @@ public class AppConfigurationTests
         // Arrange
         var builder = WebApplication.CreateBuilder();
 
-        builder.Services.ConfigureServices();
+        builder.Services.ConfigureServices(builder.Configuration);
 
         var app = builder.Build();
 
