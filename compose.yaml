@@ -1,0 +1,28 @@
+services:
+  server:
+    build:
+      context: .
+      target: final
+    ports:
+      - 8085:8080
+    networks:
+      - selfban
+    environment:
+      Mongo__Url: "mongodb://mongo:27017"
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - selfban
+
+networks:
+  selfban:
+    driver: bridge
+
+volumes:
+  mongo-data:

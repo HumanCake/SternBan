@@ -7,7 +7,7 @@ namespace Application;
 
 public static class AppConfiguration
 {
-    public static void ConfigureServices(this IServiceCollection services)
+    public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddControllers();
         services.AddEndpointsApiExplorer();
@@ -20,8 +20,16 @@ public static class AppConfiguration
 
         services.AddSingleton<IMongoClient>(_ =>
         {
-            //TODO move to appsettings
-            var connectionString = "mongodb://localhost:27017";
+            // Check environment variable first (docker), fall back to appsettings.json
+            var connectionString = Environment.GetEnvironmentVariable("Mongo:Url")
+                ?? configuration.GetSection("Mongo:Url").Value;
+            Console.WriteLine("This is the mongo connection stiring: " + connectionString);
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("MongoDB connection string is not configured.");
+            }
+
             return new MongoClient(connectionString);
         });
 
@@ -31,6 +39,15 @@ public static class AppConfiguration
         services.AddScoped<IKanbanService, KanbanService>();
 
         services.AddScoped<IValidator<Board>, BoardValidator>();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
     }
 
     public static void ConfigureMiddleware(this IApplicationBuilder app)
@@ -39,6 +56,7 @@ public static class AppConfiguration
         app.UseSwaggerUI();
         app.UseHttpsRedirection();
         app.UseRouting();
+        app.UseCors("AllowAll");
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
 }
