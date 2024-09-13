@@ -79,7 +79,7 @@ public class KanbanController : ControllerBase
     }
 
     [HttpDelete("{boardId}/columns/{columnId}")]
-    public async Task<IActionResult> RemoveColumn(string boardId, string columnId)
+    public async Task<IActionResult> RemoveColumn(string boardId, Guid columnId)
     {
         var result = await _kanbanService.RemoveColumnAsync(boardId, columnId);
         if (!result.Success)
@@ -97,7 +97,7 @@ public class KanbanController : ControllerBase
     }
 
     [HttpPut("{boardId}/columns/{columnId}/tickets")]
-    public async Task<IActionResult> PutTicket(string boardId, string columnId, [FromBody] Ticket ticket)
+    public async Task<IActionResult> PutTicket(string boardId, Guid columnId, [FromBody] Ticket ticket)
     {
         var result = await _kanbanService.PutTicketAsync(boardId, columnId, ticket);
         if (!result.Success)
@@ -115,7 +115,7 @@ public class KanbanController : ControllerBase
     }
 
     [HttpDelete("{boardId}/columns/{columnId}/tickets/{ticketId}")]
-    public async Task<IActionResult> RemoveTicket(string boardId, string columnId, string ticketId)
+    public async Task<IActionResult> RemoveTicket(string boardId, Guid columnId, Guid ticketId)
     {
         var result = await _kanbanService.RemoveTicketAsync(boardId, columnId, ticketId);
         if (!result.Success)

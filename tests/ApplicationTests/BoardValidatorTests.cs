@@ -26,11 +26,13 @@ public class BoardValidatorTests
             {
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
+                            TicketId = Guid.NewGuid(),
                             Title = "t1", Description = "Ticket 1 Description"
                         }
                     }
@@ -58,11 +60,13 @@ public class BoardValidatorTests
             {
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
+                            TicketId = Guid.NewGuid(),
                             Title = "t1", Description = "Ticket 1 Description"
                         }
                     }
@@ -89,11 +93,13 @@ public class BoardValidatorTests
             {
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
+                            TicketId = Guid.NewGuid(),
                             Title = "t1", Description = "Ticket 1 Description"
                         }
                     }
@@ -136,11 +142,13 @@ public class BoardValidatorTests
             {
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
+                            TicketId = Guid.NewGuid(),
                             Title = "t1", Description = "Ticket 1 Description"
                         }
                     }
@@ -167,11 +175,13 @@ public class BoardValidatorTests
             {
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "Column 1",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
+                            TicketId = Guid.NewGuid(),
                             Title = "", Description = "Ticket 1 Description"
                         }
                     }

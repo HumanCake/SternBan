@@ -50,14 +50,14 @@ public class KanbanService : IKanbanService
         return await PutBoardAsync(board);
     }
 
-    public async Task<OperationResult<Board>> RemoveColumnAsync(string boardId, string columnId)
+    public async Task<OperationResult<Board>> RemoveColumnAsync(string boardId, Guid columnId)
     {
         var boardResult = await GetBoardAsync(boardId);
         if (!boardResult.Success) return boardResult;
 
         var board = boardResult.Data;
         Debug.Assert(board != null, nameof(board) + " != null");
-        var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
+        var column = board.Columns.FirstOrDefault(c => c.ColumnId == columnId);
         if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
 
         board.Columns.Remove(column);
@@ -67,7 +67,7 @@ public class KanbanService : IKanbanService
         return await PutBoardAsync(board);
     }
 
-    public async Task<OperationResult<Board>> PutTicketAsync(string boardId, string columnId, Ticket ticket)
+    public async Task<OperationResult<Board>> PutTicketAsync(string boardId, Guid columnId, Ticket ticket)
     {
         var boardResult = await GetBoardAsync(boardId);
         if (!boardResult.Success) return boardResult;
@@ -75,7 +75,7 @@ public class KanbanService : IKanbanService
         var board = boardResult.Data;
 
         Debug.Assert(board != null, nameof(board) + " != null");
-        var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
+        var column = board.Columns.FirstOrDefault(c => c.ColumnId == columnId);
         if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
 
         column.Tickets?.Add(ticket);
@@ -89,7 +89,7 @@ public class KanbanService : IKanbanService
         return await PutBoardAsync(board);
     }
 
-    public async Task<OperationResult<Board>> RemoveTicketAsync(string boardId, string columnId, string ticketId)
+    public async Task<OperationResult<Board>> RemoveTicketAsync(string boardId, Guid columnId, Guid ticketId)
     {
         var boardResult = await GetBoardAsync(boardId);
         if (!boardResult.Success) return boardResult;
@@ -97,9 +97,9 @@ public class KanbanService : IKanbanService
         var board = boardResult.Data;
 
         Debug.Assert(board != null, nameof(board) + " != null");
-        var column = board.Columns.FirstOrDefault(c => c.Title == columnId);
+        var column = board.Columns.FirstOrDefault(c => c.ColumnId == columnId);
         if (column == null) return OperationResult<Board>.ErrorResult("Column not found");
-        var ticket = column.Tickets?.FirstOrDefault(t => t.Title == ticketId);
+        var ticket = column.Tickets?.FirstOrDefault(t => t.TicketId == ticketId);
         if (ticket == null) return OperationResult<Board>.ErrorResult("Ticket not found");
 
         column.Tickets?.Remove(ticket);

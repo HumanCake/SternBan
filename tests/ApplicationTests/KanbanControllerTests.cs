@@ -111,7 +111,7 @@ public class KanbanControllerTests
         var existingBoard = Board.DefaultBoard();
         var columnToPut = new Column
         {
-            Title = null!
+            ColumnId = Guid.NewGuid(), Title = null!
         };
         var boardToValidate = Board.DefaultBoard();
         boardToValidate.Columns.Add(columnToPut);
@@ -167,7 +167,7 @@ public class KanbanControllerTests
     {
         //Arrange
         var boardId = "boardId";
-        var columnId = "columnId";
+        var columnId = Guid.NewGuid();
         var errorMessage = "Something went wrong";
         var errorResult = OperationResult<Board>.ErrorResult(errorMessage);
         _kanbanService.RemoveColumnAsync(boardId, columnId)
@@ -190,7 +190,7 @@ public class KanbanControllerTests
     {
         //Arrange
         var boardId = Board.DefaultBoard().BoardId;
-        var columnId = Board.DefaultBoard().Columns.FirstOrDefault()!.Title;
+        var columnId = Board.DefaultBoard().Columns.FirstOrDefault()!.ColumnId;
         var successResult = OperationResult<Board>.SuccessResult(Board.DefaultBoard());
         _kanbanService.RemoveColumnAsync(boardId, columnId)
             .Returns(successResult);
@@ -214,10 +214,10 @@ public class KanbanControllerTests
     {
         //Arrange
         var boardId = "boardId";
-        var columnId = "columnId";
+        var columnId = Guid.NewGuid();
         var ticket = new Ticket
         {
-            Title = "title"
+            TicketId = Guid.NewGuid(), Title = "title"
         };
         var errorMessage = "Something went wrong";
         var errorResult = OperationResult<Board>.ErrorResult(errorMessage);
@@ -241,10 +241,10 @@ public class KanbanControllerTests
     {
         //Arrange
         var boardId = Board.DefaultBoard().BoardId;
-        var columnId = Board.DefaultBoard().Columns.FirstOrDefault()!.Title;
+        var columnId = Board.DefaultBoard().Columns.FirstOrDefault()!.ColumnId;
         var ticket = new Ticket
         {
-            Title = "some title"
+            TicketId = Guid.NewGuid(), Title = "some title"
         };
         var successResult = OperationResult<Board>.SuccessResult(Board.DefaultBoard());
         _kanbanService.PutTicketAsync(boardId, columnId, ticket)

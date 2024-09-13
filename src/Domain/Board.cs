@@ -21,38 +21,41 @@ public record Board
             {
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "To Do",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
-                            Title = "t1", Description = "Ticket 1 Description"
+                            TicketId = Guid.NewGuid(), Title = "t1", Description = "Ticket 1 Description"
                         },
                         new()
                         {
-                            Title = "t2", Description = "Ticket 2 Description"
+                            TicketId = Guid.NewGuid(), Title = "t2", Description = "Ticket 2 Description"
                         }
                     }
                 },
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "Doing",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
-                            Title = "t3", Description = "Ticket 3 Description"
+                            TicketId = Guid.NewGuid(), Title = "t3", Description = "Ticket 3 Description"
                         }
                     }
                 },
                 new()
                 {
+                    ColumnId = Guid.NewGuid(),
                     Title = "Done",
                     Tickets = new List<Ticket>
                     {
                         new()
                         {
-                            Title = "t4", Description = "Ticket 4 Description"
+                            TicketId = Guid.NewGuid(), Title = "t4", Description = "Ticket 4 Description"
                         }
                     }
                 }

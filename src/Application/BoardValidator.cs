@@ -20,6 +20,7 @@ public class ColumnValidator : AbstractValidator<Column>
 {
     public ColumnValidator()
     {
+        RuleFor(x => x.ColumnId).NotEmpty();
         RuleFor(x => x.Title).NotEmpty();
         RuleForEach(x => x.Tickets).SetValidator(new TicketValidator());
     }
@@ -29,6 +30,7 @@ public class TicketValidator : AbstractValidator<Ticket>
 {
     public TicketValidator()
     {
+        RuleFor(x => x.TicketId).NotEmpty();
         RuleFor(x => x.Title).NotEmpty();
     }
 }

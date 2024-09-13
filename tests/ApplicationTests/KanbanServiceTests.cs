@@ -104,7 +104,7 @@ public class KanbanServiceTests
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data!.Columns.Exists(column => column.Title == columnToPut.Title), Is.True);
+        Assert.That(result.Data!.Columns.Exists(column => column.ColumnId == columnToPut.ColumnId), Is.True);
     }
 
     [Test]
@@ -157,11 +157,11 @@ public class KanbanServiceTests
             .Returns(x => x.Arg<Board>());
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync(boardId, columnToRemove!.Title);
+        var result = await _kanbanService.RemoveColumnAsync(boardId, columnToRemove!.ColumnId);
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data!.Columns.Any(c => c.Title == columnToRemove.Title), Is.False);
+        Assert.That(result.Data!.Columns.Any(c => c.ColumnId == columnToRemove.ColumnId), Is.False);
     }
 
     [Test]
@@ -180,7 +180,7 @@ public class KanbanServiceTests
             .Returns(board);
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync(board.BoardId, columnToRemove!.Title);
+        var result = await _kanbanService.RemoveColumnAsync(board.BoardId, columnToRemove!.ColumnId);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -195,7 +195,7 @@ public class KanbanServiceTests
             .Returns(_defaultBoard);
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync(_defaultBoard.BoardId, "unknown");
+        var result = await _kanbanService.RemoveColumnAsync(_defaultBoard.BoardId, Guid.Empty);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -210,7 +210,7 @@ public class KanbanServiceTests
             .Returns(Task.FromResult<Board>(null!));
 
         //Act
-        var result = await _kanbanService.RemoveColumnAsync("unknown", "unknown");
+        var result = await _kanbanService.RemoveColumnAsync("unknown", Guid.Empty);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -224,6 +224,7 @@ public class KanbanServiceTests
         var ticketName = "new ticket";
         var ticketToPut = _defaultBoard.Columns.FirstOrDefault()!.Tickets!.FirstOrDefault()! with
         {
+            TicketId = Guid.NewGuid(),
             Title = ticketName
         };
 
@@ -234,7 +235,7 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToPut);
+            _defaultBoard.Columns.FirstOrDefault()!.ColumnId, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.True);
@@ -256,7 +257,7 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            "unknown column", ticketToPut);
+            Guid.Empty, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -278,7 +279,7 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToPut);
+            _defaultBoard.Columns.FirstOrDefault()!.ColumnId, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -299,7 +300,7 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.PutTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToPut);
+            _defaultBoard.Columns.FirstOrDefault()!.ColumnId, ticketToPut);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -318,11 +319,12 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToRemove!.Title);
+            _defaultBoard.Columns.FirstOrDefault()!.ColumnId, ticketToRemove!.TicketId);
 
         //Assert
         Assert.That(result.Success, Is.True);
-        Assert.That(result.Data!.Columns.FirstOrDefault()!.Tickets!.Any(ticket => ticket.Title == ticketToRemove.Title),
+        Assert.That(
+            result.Data!.Columns.FirstOrDefault()!.Tickets!.Any(ticket => ticket.TicketId == ticketToRemove.TicketId),
             Is.False);
     }
 
@@ -336,7 +338,7 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
-            _defaultBoard.Columns.FirstOrDefault()!.Title, ticketToRemove);
+            _defaultBoard.Columns.FirstOrDefault()!.ColumnId, Guid.Empty);
 
         //Assert
         Assert.That(result.Success, Is.False);
@@ -353,7 +355,7 @@ public class KanbanServiceTests
 
         //Act
         var result = await _kanbanService.RemoveTicketAsync(_defaultBoard.BoardId,
-            "unknown column", ticketToRemove!.Title);
+            Guid.Empty, ticketToRemove!.TicketId);
 
         //Assert
         Assert.That(result.Success, Is.False);
