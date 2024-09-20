@@ -332,7 +332,6 @@ public class KanbanServiceTests
     public async Task RemoveTicketAsync_TicketDoesNotExist_ReturnErrorResult()
     {
         //Arrange
-        var ticketToRemove = "unknown ticket";
         _database.GetBoardAsync(_defaultBoard.BoardId)
             .Returns(_defaultBoard);
 

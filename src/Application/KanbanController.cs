@@ -78,6 +78,27 @@ public class KanbanController : ControllerBase
         });
     }
 
+    [HttpPut("{boardId}/columns/{columnTitle}")]
+    public async Task<IActionResult> PutColumn(string boardId, string columnTitle)
+    {
+        var column = new Column
+        {
+            ColumnId = Guid.NewGuid(), Title = columnTitle, Tickets = new List<Ticket>()
+        };
+        var result = await _kanbanService.PutColumnAsync(boardId, column);
+        if (!result.Success)
+        {
+            _logger.LogWarning($"Failed to add column to board with ID '{boardId}': {result.ErrorMessage}");
+            return BadRequest(result.ErrorMessage);
+        }
+
+        _logger.LogInformation($"Column added to board with ID '{boardId}'");
+        return Ok(new
+        {
+            message = "Column added", board = result.Data
+        });
+    }
+
     [HttpDelete("{boardId}/columns/{columnId}")]
     public async Task<IActionResult> RemoveColumn(string boardId, Guid columnId)
     {

@@ -111,7 +111,7 @@ public class KanbanControllerTests
         var existingBoard = Board.DefaultBoard();
         var columnToPut = new Column
         {
-            ColumnId = Guid.NewGuid(), Title = null!
+            ColumnId = Guid.NewGuid(), Title = null!, Tickets = null!
         };
         var boardToValidate = Board.DefaultBoard();
         boardToValidate.Columns.Add(columnToPut);
