@@ -31,6 +31,7 @@ public class MongoDbTests
     public async Task OneTimeTearDown()
     {
         await _mongoDbContainer.StopAsync();
+        await _mongoDbContainer.DisposeAsync();
     }
 
     [Test]
@@ -43,7 +44,7 @@ public class MongoDbTests
         var result = await _mongoDb.GetBoardAsync(boardId);
 
         // Assert
-        Assert.NotNull(result);
+        Assert.That(result, Is.Not.Null);
         Assert.That(result.BoardId, Is.EqualTo(boardId));
     }
 
@@ -57,7 +58,7 @@ public class MongoDbTests
         var result = await _mongoDb.GetBoardAsync(boardId);
 
         // Assert
-        Assert.IsNull(result);
+        Assert.That(result, Is.Null);
     }
 
     [Test]
@@ -74,7 +75,7 @@ public class MongoDbTests
 
         // Assert
         var actualBoard = await _mongoDb.GetBoardAsync(board.BoardId);
-        Assert.NotNull(actualBoard);
+        Assert.That(actualBoard, Is.Not.Null);
         Assert.That(actualBoard.BoardId, Is.EqualTo(board.BoardId));
     }
 
@@ -92,7 +93,7 @@ public class MongoDbTests
 
         // Assert
         var actualBoard = await _mongoDb.GetBoardAsync(board.BoardId);
-        Assert.NotNull(actualBoard);
+        Assert.That(actualBoard, Is.Not.Null);
         Assert.That(actualBoard.BoardId, Is.EqualTo(board.BoardId));
         Assert.That(actualBoard.Title, Is.EqualTo(board.Title));
     }
