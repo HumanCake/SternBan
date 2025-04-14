@@ -1,6 +1,7 @@
 using Domain;
 using FluentValidation;
 using Infrastructure;
+using Microsoft.OpenApi;
 using MongoDB.Driver;
 
 namespace Application;
@@ -9,9 +10,13 @@ public static class AppConfiguration
 {
     public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddOpenApi(options =>
+        {
+            options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
+        });
+        
         services.AddControllers();
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
         services.AddLogging(logging =>
         {
             logging.AddConsole();
@@ -29,7 +34,6 @@ public static class AppConfiguration
             {
                 throw new InvalidOperationException("MongoDB connection string is not configured.");
             }
-
             return new MongoClient(connectionString);
         });
 
@@ -52,8 +56,6 @@ public static class AppConfiguration
 
     public static void ConfigureMiddleware(this IApplicationBuilder app)
     {
-        app.UseSwagger();
-        app.UseSwaggerUI();
         app.UseHttpsRedirection();
         app.UseRouting();
         app.UseCors("AllowAll");
