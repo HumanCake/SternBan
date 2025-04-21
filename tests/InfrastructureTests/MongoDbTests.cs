@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using AutoFixture;
 using Domain;
 using Infrastructure;
 using MongoDB.Driver;
@@ -11,7 +13,15 @@ public class MongoDbTests
     private IMongoClient _mongoClient;
     private MongoDb _mongoDb;
     private MongoDbContainer _mongoDbContainer;
+    private Fixture _fixture;
+    private IMongoCollection<Board>? _collection;
 
+    [SetUp]
+    public void SetUp()
+    {
+        _fixture = new Fixture();
+    }
+    
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
@@ -23,8 +33,8 @@ public class MongoDbTests
         _mongoDb = new MongoDb(_mongoClient);
 
         var database = _mongoClient.GetDatabase("your_database_name");
-        var collection = database.GetCollection<Board>("boards");
-        await collection.InsertOneAsync(_defaultBoard);
+        _collection = database.GetCollection<Board>("boards");
+        await _collection.InsertOneAsync(_defaultBoard);
     }
 
     [OneTimeTearDown]
@@ -32,6 +42,25 @@ public class MongoDbTests
     {
         await _mongoDbContainer.StopAsync();
         await _mongoDbContainer.DisposeAsync();
+    }
+
+    [Test]
+    public async Task GetBoardsAsync_BoardsExits_ReturnsBoards()
+    {
+        // Arrange
+        var boards = _fixture.Create<List<Board>>();
+        Debug.Assert(_collection != null, nameof(_collection) + " != null");
+        await _collection.InsertManyAsync(boards);
+        
+        // Act
+        var result = await _mongoDb.GetBoardsAsync();
+        
+        // Assert
+        Assert.That(result, Has.Count.GreaterThanOrEqualTo(boards.Count));
+        foreach (var board in boards)
+        {
+            Assert.That(result.Any(r => r.BoardId == board.BoardId), Is.True, $"Board with ID {board.BoardId} was not found in the result.");
+        }
     }
 
     [Test]

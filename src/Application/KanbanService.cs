@@ -16,6 +16,15 @@ public class KanbanService : IKanbanService
         _boardValidator = boardValidator;
     }
 
+    public async Task<OperationResult<List<Board>>> GetBoardsAsync()
+    {
+        var boards = await _database.GetBoardsAsync();
+        if(!boards.Any())
+            return OperationResult<List<Board>>.ErrorResult("No boards found");
+
+        return OperationResult<List<Board>>.SuccessResult(boards);
+    }
+
     public async Task<OperationResult<Board>> GetBoardAsync(string boardId)
     {
         var board = await _database.GetBoardAsync(boardId);

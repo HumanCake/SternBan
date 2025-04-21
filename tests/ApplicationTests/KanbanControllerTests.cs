@@ -1,4 +1,5 @@
 using Application;
+using AutoFixture;
 using Domain;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
@@ -14,6 +15,7 @@ public class KanbanControllerTests
     private KanbanController _kanbanController;
     private IKanbanService _kanbanService;
     private ILogger<KanbanController> _logger;
+    private Fixture _fixture;
 
     [SetUp]
     public void SetUp()
@@ -22,8 +24,45 @@ public class KanbanControllerTests
         _logger = Substitute.For<ILogger<KanbanController>>();
         _boardValidator = new BoardValidator();
         _kanbanController = new KanbanController(_logger, _kanbanService, _boardValidator);
+        _fixture = new Fixture();
     }
 
+    [Test]
+    public async Task GetBoards_BoardsFound_ShouldReturnBoards()
+    {
+        // Arrange
+        var boards = _fixture.Create<List<Board>>();
+        var expectedBoard = OperationResult<List<Board>>.SuccessResult(boards);
+        _kanbanService.GetBoardsAsync().Returns(expectedBoard);
+        
+        // Act
+        var result = await _kanbanController.GetBoards();
+
+        // Assert
+        var okObjectResult = result as OkObjectResult;
+        Assert.That(okObjectResult, Is.Not.Null);
+        Assert.That(okObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
+        Assert.That(okObjectResult.Value, Is.EqualTo(boards));
+    }
+    
+    [Test]
+    public async Task GetBoards_BoardsNotFound_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var errorMessage = "No boards found";
+        var expectedResult = OperationResult<List<Board>>.ErrorResult(errorMessage);
+        _kanbanService.GetBoardsAsync().Returns(expectedResult);
+
+        // Act
+        var result = await _kanbanController.GetBoards();
+
+        // Assert
+        var badRequestObjectResult = result as BadRequestObjectResult;
+        Assert.That(badRequestObjectResult, Is.Not.Null);
+        Assert.That(badRequestObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+        Assert.That(badRequestObjectResult.Value, Is.EqualTo(errorMessage));
+    }
+    
     [Test]
     public async Task GetBoard_BoardFound_ShouldReturnOk()
     {

@@ -1,8 +1,10 @@
 using Application;
+using AutoFixture;
 using Domain;
 using FluentValidation;
 using Infrastructure;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace ApplicationTests;
 
@@ -12,6 +14,7 @@ public class KanbanServiceTests
     private IDatabase _database;
     private Board _defaultBoard;
     private KanbanService _kanbanService;
+    private Fixture _fixture;
 
     [SetUp]
     public void Setup()
@@ -19,6 +22,40 @@ public class KanbanServiceTests
         _database = Substitute.For<IDatabase>();
         _kanbanService = new KanbanService(_database, _boardValidator);
         _defaultBoard = Board.DefaultBoard();
+        _fixture = new Fixture();
+    }
+
+    [Test]
+    public async Task GetBoardsAsyncBoardsExists_ReturnsSuccessResult()
+    {
+        // Arrange
+        var boards = _fixture.Create<List<Board>>();
+        _database.GetBoardsAsync().Returns(Task.FromResult(boards));
+        
+        // Act
+        var result = await _kanbanService.GetBoardsAsync();
+        
+        //Assert
+        Assert.That(result.Success, Is.True);
+        await _database.Received(1).GetBoardsAsync();
+    }
+    
+    [Test]
+    public async Task GetBoardsAsync_NoBoardsExist_ReturnsErrorResult()
+    {
+        // Arrange
+        var emptyList = new List<Board>();
+        _database.GetBoardsAsync().Returns(Task.FromResult(emptyList));
+
+        // Act
+        var result = await _kanbanService.GetBoardsAsync();
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Success, Is.False);
+        Assert.That(result.ErrorMessage, Is.EqualTo("No boards found"));
+        Assert.That(result.Data, Is.Null); 
+        await _database.Received(1).GetBoardsAsync();
     }
 
     [Test]
@@ -34,6 +71,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data, Is.EqualTo(_defaultBoard));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -49,6 +87,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -63,6 +102,7 @@ public class KanbanServiceTests
         // Assert
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data, Is.EqualTo(_defaultBoard));
+        await _database.Received(1).PutBoardAsync(_defaultBoard);
     }
 
     [Test]
@@ -105,6 +145,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data!.Columns.Exists(column => column.ColumnId == columnToPut.ColumnId), Is.True);
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -124,6 +165,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Board not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -143,6 +185,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("must not be empty"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -162,6 +205,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data!.Columns.Any(c => c.ColumnId == columnToRemove.ColumnId), Is.False);
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -185,6 +229,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("must not be empty"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -200,6 +245,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Column not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -215,6 +261,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Board not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -240,6 +287,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.True);
         Assert.That(result.Data!.Columns.FirstOrDefault()!.Tickets!.Any(ticket => ticket.Title == ticketName), Is.True);
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -262,6 +310,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Column not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -284,6 +333,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Board not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -305,6 +355,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("must not be empty"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -326,6 +377,7 @@ public class KanbanServiceTests
         Assert.That(
             result.Data!.Columns.FirstOrDefault()!.Tickets!.Any(ticket => ticket.TicketId == ticketToRemove.TicketId),
             Is.False);
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -342,6 +394,7 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Ticket not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 
     [Test]
@@ -359,5 +412,6 @@ public class KanbanServiceTests
         //Assert
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Does.Contain("Column not found"));
+        await _database.Received(1).GetBoardAsync(Arg.Any<string>());
     }
 }

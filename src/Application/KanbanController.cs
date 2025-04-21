@@ -19,6 +19,21 @@ public class KanbanController : ControllerBase
         _boardValidator = boardValidator;
         _logger = logger;
     }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetBoards()
+    {
+        var board = await _kanbanService.GetBoardsAsync();
+        if (!board.Success)
+        {
+            _logger.LogWarning($"Failed to retrieve boards': {board.ErrorMessage}");
+            return BadRequest(board.ErrorMessage);
+        }
+
+        _logger.LogInformation($"Boards retrieved successfully.");
+
+        return Ok(board.Data);
+    }
 
     [HttpGet("{boardId}")]
     public async Task<IActionResult> GetBoard(string boardId)
