@@ -1,5 +1,5 @@
 # Sternban
-This project is a back-end hobby project created for me to learn about clean arcitechture and DDD and CI/CD using docker and github actions (this is the reason this project is public).Got it — here’s a simpler and more straightforward version of the Installation & Deployment (Docker) section, focusing on clarity without over-explaining:
+This project is a back-end hobby project created for me to learn about clean arcitechture and DDD and CI/CD using docker and github actions (this is the reason this project is public).
 
 ## Installation & Deployment (Docker)
 
