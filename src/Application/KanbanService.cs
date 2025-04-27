@@ -16,10 +16,20 @@ public class KanbanService : IKanbanService
         _boardValidator = boardValidator;
     }
 
+    public Board CreateDefaultBoardWithTitle(string boardTitle)
+    {
+        var board = Board.DefaultBoard() with
+        {
+            BoardId = Guid.NewGuid().ToString()
+        };
+        board.Title = boardTitle;
+        return board;
+    }
+
     public async Task<OperationResult<List<Board>>> GetBoardsAsync()
     {
         var boards = await _database.GetBoardsAsync();
-        if(!boards.Any())
+        if (!boards.Any())
             return OperationResult<List<Board>>.ErrorResult("No boards found");
 
         return OperationResult<List<Board>>.SuccessResult(boards);

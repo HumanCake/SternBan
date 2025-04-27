@@ -12,10 +12,10 @@ namespace ApplicationTests;
 public class KanbanControllerTests
 {
     private IValidator<Board> _boardValidator;
+    private Fixture _fixture;
     private KanbanController _kanbanController;
     private IKanbanService _kanbanService;
     private ILogger<KanbanController> _logger;
-    private Fixture _fixture;
 
     [SetUp]
     public void SetUp()
@@ -28,13 +28,69 @@ public class KanbanControllerTests
     }
 
     [Test]
+    public async Task CreateNewDefaultBoardWithTitle_Called_ShouldCreateNewBoard()
+    {
+        // Arrange
+        var boardTitle = _fixture.Create<string>();
+
+        var board = Board.DefaultBoard() with
+        {
+            BoardId = Guid.NewGuid().ToString(),
+            Title = boardTitle
+        };
+
+        _kanbanService.CreateDefaultBoardWithTitle(boardTitle).Returns(board);
+        _kanbanService.PutBoardAsync(Arg.Any<Board>())
+            .Returns(Task.FromResult(OperationResult<Board>.SuccessResult(board)));
+
+        // Act
+        var result = await _kanbanController.CreateNewDefaultBoard(boardTitle);
+
+        // Assert
+        var okResult = result as OkObjectResult;
+        Assert.That(okResult, Is.Not.Null);
+        Assert.That(okResult.StatusCode, Is.EqualTo(StatusCodes.Status200OK).Or.EqualTo(null));
+        Assert.That(okResult.Value?.ToString(), Does.Contain(boardTitle));
+
+        _kanbanService.Received(1).CreateDefaultBoardWithTitle(boardTitle);
+        await _kanbanService.Received(1).PutBoardAsync(Arg.Is<Board>(b => b.Title == boardTitle));
+    }
+
+    [Test]
+    public async Task CreateNewDefaultBoard_WhenValidationFails_ShouldReturnBadRequest()
+    {
+        // Arrange
+        var boardTitle = "";
+
+        var invalidBoard = Board.DefaultBoard() with
+        {
+            BoardId = Guid.NewGuid().ToString(),
+            Title = boardTitle
+        };
+
+        _kanbanService.CreateDefaultBoardWithTitle(boardTitle).Returns(invalidBoard);
+
+        // Force the validation to fail via PutBoardAsync
+        _kanbanService.PutBoardAsync(Arg.Any<Board>())
+            .Returns(OperationResult<Board>.ErrorResult("Validation failed"));
+
+        // Act
+        var result = await _kanbanController.CreateNewDefaultBoard(boardTitle);
+
+        // Assert
+        var badRequest = result as BadRequestObjectResult;
+        Assert.That(badRequest, Is.Not.Null);
+        Assert.That(badRequest.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
+    }
+
+    [Test]
     public async Task GetBoards_BoardsFound_ShouldReturnBoards()
     {
         // Arrange
         var boards = _fixture.Create<List<Board>>();
         var expectedBoard = OperationResult<List<Board>>.SuccessResult(boards);
         _kanbanService.GetBoardsAsync().Returns(expectedBoard);
-        
+
         // Act
         var result = await _kanbanController.GetBoards();
 
@@ -44,7 +100,7 @@ public class KanbanControllerTests
         Assert.That(okObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
         Assert.That(okObjectResult.Value, Is.EqualTo(boards));
     }
-    
+
     [Test]
     public async Task GetBoards_BoardsNotFound_ShouldReturnBadRequest()
     {
@@ -62,7 +118,7 @@ public class KanbanControllerTests
         Assert.That(badRequestObjectResult.StatusCode, Is.EqualTo(StatusCodes.Status400BadRequest));
         Assert.That(badRequestObjectResult.Value, Is.EqualTo(errorMessage));
     }
-    
+
     [Test]
     public async Task GetBoard_BoardFound_ShouldReturnOk()
     {

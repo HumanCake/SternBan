@@ -4,7 +4,6 @@ using Domain;
 using FluentValidation;
 using Infrastructure;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 
 namespace ApplicationTests;
 
@@ -13,8 +12,8 @@ public class KanbanServiceTests
     private readonly IValidator<Board> _boardValidator = new BoardValidator();
     private IDatabase _database;
     private Board _defaultBoard;
-    private KanbanService _kanbanService;
     private Fixture _fixture;
+    private KanbanService _kanbanService;
 
     [SetUp]
     public void Setup()
@@ -26,20 +25,37 @@ public class KanbanServiceTests
     }
 
     [Test]
+    public void CreateDefaultBoardWithTitle_ValidTitle_ShouldReturnBoardWithNewIdAndGivenTitle()
+    {
+        // Arrange
+        var boardTitle = _fixture.Create<string>();
+
+        // Act
+        var result = _kanbanService.CreateDefaultBoardWithTitle(boardTitle);
+
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Title, Is.EqualTo(boardTitle));
+        Assert.That(result.BoardId, Is.Not.EqualTo("b1")); // "b1" is from the original DefaultBoard
+        Assert.That(result.Columns, Is.Not.Null.And.Not.Empty);
+        Assert.That(result.Columns.Count, Is.EqualTo(3));
+    }
+
+    [Test]
     public async Task GetBoardsAsyncBoardsExists_ReturnsSuccessResult()
     {
         // Arrange
         var boards = _fixture.Create<List<Board>>();
         _database.GetBoardsAsync().Returns(Task.FromResult(boards));
-        
+
         // Act
         var result = await _kanbanService.GetBoardsAsync();
-        
+
         //Assert
         Assert.That(result.Success, Is.True);
         await _database.Received(1).GetBoardsAsync();
     }
-    
+
     [Test]
     public async Task GetBoardsAsync_NoBoardsExist_ReturnsErrorResult()
     {
@@ -54,7 +70,7 @@ public class KanbanServiceTests
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Success, Is.False);
         Assert.That(result.ErrorMessage, Is.EqualTo("No boards found"));
-        Assert.That(result.Data, Is.Null); 
+        Assert.That(result.Data, Is.Null);
         await _database.Received(1).GetBoardsAsync();
     }
 

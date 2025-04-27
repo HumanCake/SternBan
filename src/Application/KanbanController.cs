@@ -19,7 +19,33 @@ public class KanbanController : ControllerBase
         _boardValidator = boardValidator;
         _logger = logger;
     }
-    
+
+    [HttpPost("{boardTitle}")]
+    public async Task<IActionResult> CreateNewDefaultBoard(string boardTitle)
+    {
+        var board = _kanbanService.CreateDefaultBoardWithTitle(boardTitle);
+        var validationResult = await _boardValidator.ValidateAsync(board);
+        if (!validationResult.IsValid)
+        {
+            validationResult.AddToModelState(ModelState);
+            return BadRequest(ModelState);
+        }
+
+        var result = await _kanbanService.PutBoardAsync(board);
+        if (result.Data != null)
+        {
+            _logger.LogInformation($"The Board with title'{result.Data.Title}' was created");
+
+            return Ok("The board was created:\n" + result.Data);
+        }
+
+        _logger.LogError($"Failed to create the board: {board.Title}");
+        return StatusCode(500, new
+        {
+            message = "An error occurred while processing your request."
+        });
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetBoards()
     {

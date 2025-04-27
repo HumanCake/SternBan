@@ -4,9 +4,8 @@ namespace Application;
 
 public interface IKanbanService
 {
-    
+    Board CreateDefaultBoardWithTitle(string boardTitle);
     Task<OperationResult<List<Board>>> GetBoardsAsync();
-
     Task<OperationResult<Board>> GetBoardAsync(string boardId);
     Task<OperationResult<Board>> PutBoardAsync(Board board);
     Task<OperationResult<Board>> PutColumnAsync(string boardId, Column column);
