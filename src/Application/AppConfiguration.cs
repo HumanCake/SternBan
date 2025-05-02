@@ -2,6 +2,9 @@ using Domain;
 using FluentValidation;
 using Infrastructure;
 using Microsoft.OpenApi;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 
 namespace Application;
@@ -10,11 +13,10 @@ public static class AppConfiguration
 {
     public static void ConfigureServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddOpenApi(options =>
-        {
-            options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0;
-        });
-        
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
+        services.AddOpenApi(options => { options.OpenApiVersion = OpenApiSpecVersion.OpenApi2_0; });
+
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddLogging(logging =>
@@ -27,13 +29,11 @@ public static class AppConfiguration
         {
             // Check environment variable first (docker), fall back to appsettings.json
             var connectionString = Environment.GetEnvironmentVariable("Mongo:Url")
-                ?? configuration.GetSection("Mongo:Url").Value;
+                                   ?? configuration.GetSection("Mongo:Url").Value;
             Console.WriteLine("This is the mongo connection stiring: " + connectionString);
 
             if (string.IsNullOrEmpty(connectionString))
-            {
                 throw new InvalidOperationException("MongoDB connection string is not configured.");
-            }
             return new MongoClient(connectionString);
         });
 

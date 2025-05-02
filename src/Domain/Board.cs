@@ -4,8 +4,7 @@ namespace Domain;
 
 public record Board
 {
-    [BsonId]
-    public required string BoardId { get; init; }
+    [BsonId] public required string BoardId { get; init; }
 
     public required string Title { get; set; }
     public required List<Column> Columns { get; set; }

@@ -47,9 +47,7 @@ public class KanbanService : IKanbanService
     {
         var validationResult = await _boardValidator.ValidateAsync(board);
         if (!validationResult.IsValid)
-        {
             return OperationResult<Board>.ErrorResult(validationResult.ToString() ?? string.Empty);
-        }
 
         board = await _database.PutBoardAsync(board);
         return OperationResult<Board>.SuccessResult(board);
@@ -100,10 +98,7 @@ public class KanbanService : IKanbanService
         column.Tickets?.Add(ticket);
         var validationResult = await _boardValidator.ValidateAsync(board);
 
-        if (!validationResult.IsValid)
-        {
-            return OperationResult<Board>.ErrorResult(validationResult.ToString());
-        }
+        if (!validationResult.IsValid) return OperationResult<Board>.ErrorResult(validationResult.ToString());
 
         return await PutBoardAsync(board);
     }

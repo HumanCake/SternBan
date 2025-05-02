@@ -56,7 +56,7 @@ public class KanbanController : ControllerBase
             return BadRequest(board.ErrorMessage);
         }
 
-        _logger.LogInformation($"Boards retrieved successfully.");
+        _logger.LogInformation("Boards retrieved successfully.");
 
         return Ok(board.Data);
     }

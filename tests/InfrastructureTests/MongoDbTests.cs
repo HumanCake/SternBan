@@ -2,6 +2,9 @@ using System.Diagnostics;
 using AutoFixture;
 using Domain;
 using Infrastructure;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Testcontainers.MongoDb;
 
@@ -10,21 +13,22 @@ namespace InfrastructureTests;
 public class MongoDbTests
 {
     private readonly Board _defaultBoard = Board.DefaultBoard();
+    private IMongoCollection<Board>? _collection;
+    private Fixture _fixture;
     private IMongoClient _mongoClient;
     private MongoDb _mongoDb;
     private MongoDbContainer _mongoDbContainer;
-    private Fixture _fixture;
-    private IMongoCollection<Board>? _collection;
 
     [SetUp]
     public void SetUp()
     {
         _fixture = new Fixture();
     }
-    
+
     [OneTimeSetUp]
     public async Task OneTimeSetUp()
     {
+        BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
         _mongoDbContainer = new MongoDbBuilder()
             .Build();
 
@@ -42,6 +46,7 @@ public class MongoDbTests
     {
         await _mongoDbContainer.StopAsync();
         await _mongoDbContainer.DisposeAsync();
+        _mongoClient.Dispose();
     }
 
     [Test]
@@ -51,16 +56,15 @@ public class MongoDbTests
         var boards = _fixture.Create<List<Board>>();
         Debug.Assert(_collection != null, nameof(_collection) + " != null");
         await _collection.InsertManyAsync(boards);
-        
+
         // Act
         var result = await _mongoDb.GetBoardsAsync();
-        
+
         // Assert
         Assert.That(result, Has.Count.GreaterThanOrEqualTo(boards.Count));
         foreach (var board in boards)
-        {
-            Assert.That(result.Any(r => r.BoardId == board.BoardId), Is.True, $"Board with ID {board.BoardId} was not found in the result.");
-        }
+            Assert.That(result.Any(r => r.BoardId == board.BoardId), Is.True,
+                $"Board with ID {board.BoardId} was not found in the result.");
     }
 
     [Test]
